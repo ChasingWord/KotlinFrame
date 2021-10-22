@@ -1,4 +1,4 @@
-package com.shrimp.base.utils.decoration
+package com.shrimp.base.decoration
 
 import android.content.Context
 import android.graphics.Rect

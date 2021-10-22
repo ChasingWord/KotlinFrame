@@ -1,4 +1,4 @@
-package com.shrimp.base.utils.receiver
+package com.shrimp.base.receiver
 
 import android.content.BroadcastReceiver
 import android.content.Context

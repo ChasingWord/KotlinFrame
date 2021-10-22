@@ -24,7 +24,7 @@ import androidx.annotation.StringRes
 import androidx.core.app.ActivityCompat
 import androidx.core.app.NotificationCompat
 import com.shrimp.base.R
-import com.shrimp.base.utils.receiver.NotificationClickReceiver
+import com.shrimp.base.receiver.NotificationClickReceiver
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch

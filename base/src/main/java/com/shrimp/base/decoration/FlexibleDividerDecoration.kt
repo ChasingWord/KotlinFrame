@@ -1,4 +1,4 @@
-package com.shrimp.base.utils.decoration
+package com.shrimp.base.decoration
 
 import android.R
 import android.content.Context
@@ -15,7 +15,7 @@ import androidx.core.content.ContextCompat
 import androidx.recyclerview.widget.GridLayoutManager
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
-import com.shrimp.base.utils.decoration.FlexibleDividerDecoration.*
+import com.shrimp.base.decoration.FlexibleDividerDecoration.*
 
 /**
  * Created by chasing on 2021/10/22.
