@@ -1,0 +1,53 @@
+plugins {
+    id 'com.android.library'
+    id 'kotlin-android'
+}
+
+def depend = rootProject.ext.dependencies
+
+android {
+    compileSdk unitCompileSdk
+
+    defaultConfig {
+        minSdk unitMinSdk
+        targetSdk unitTargetSdk
+        versionCode 1
+        versionName "1.0"
+
+        testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
+        consumerProguardFiles "consumer-rules.pro"
+    }
+
+    buildTypes {
+        release {
+            minifyEnabled false
+            proguardFiles getDefaultProguardFile('proguard-android-optimize.txt'), 'proguard-rules.pro'
+        }
+    }
+    compileOptions {
+        sourceCompatibility JavaVersion.VERSION_1_8
+        targetCompatibility JavaVersion.VERSION_1_8
+    }
+    kotlinOptions {
+        jvmTarget = '1.8'
+    }
+}
+
+dependencies {
+
+    implementation depend["core"]
+    implementation depend["appcompat"]
+    implementation depend["material"]
+    testImplementation depend["junit"]
+    androidTestImplementation depend["testJunit"]
+    androidTestImplementation depend["testEspresso"]
+
+    implementation depend["exifinterface"]
+    api depend["recyclerview"]
+    api depend["lifecycle"]
+
+    //协程
+    api depend["kotlinCoroutinesCore"]
+    api depend["kotlinCoroutinesAndroid"]
+
+}
