@@ -6,7 +6,7 @@ dependencyResolutionManagement {
         jcenter() // Warning: this repository is going to shut down soon
     }
 }
-rootProject.name = "TestKotlin"
+rootProject.name = "KotlinFrame"
 include ':app'
 include ':base'
 include ':network'

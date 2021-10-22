@@ -33,7 +33,6 @@ object RetrofitClient {
 
     private fun newHttpClient(): OkHttpClient {
         return OkHttpClient().newBuilder()
-//            .addInterceptor()
             .readTimeout(60, TimeUnit.SECONDS)
             .writeTimeout(60, TimeUnit.SECONDS)
             .connectTimeout(60, TimeUnit.SECONDS)
