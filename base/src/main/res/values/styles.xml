@@ -1,0 +1,6 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <style name="loading_progressbar_style" parent="android:style/Widget.ProgressBar">
+        <item name="android:indeterminateDrawable">@drawable/shrimp_loading_progress_animated</item>
+    </style>
+</resources>

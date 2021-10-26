@@ -224,7 +224,7 @@ object ActivityUtil {
                 return filePath
             }
         } catch (e: Exception) {
-            showToast(activity, activity.resources.getString(R.string.photo_can_not_write))
+            showToast(activity, activity.resources.getString(R.string.shrimp_photo_can_not_write))
         }
         return null
     }
@@ -278,7 +278,7 @@ object ActivityUtil {
                 return FileUtil.getFilePathByUri(activity, uriTempFile)
             }
         } catch (ignored: Exception) {
-            showToast(activity, activity.resources.getString(R.string.photo_can_not_write))
+            showToast(activity, activity.resources.getString(R.string.shrimp_photo_can_not_write))
         }
         return null
     }

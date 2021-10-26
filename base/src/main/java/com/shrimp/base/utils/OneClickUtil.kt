@@ -12,11 +12,7 @@ import java.util.*
 class OneClickUtil {
     private val minClickDelayTime = 500
 
-    private lateinit var lastClickTimeMap: MutableMap<String, Long>
-
-    fun OneClickUtil() {
-        lastClickTimeMap = HashMap()
-    }
+    private var lastClickTimeMap: MutableMap<String, Long> = HashMap()
 
     /**
      * 检测是否连续单击了两次
@@ -29,11 +25,8 @@ class OneClickUtil {
     }
 
     //singleSign能代表唯一标识即可
-    fun check(singleSign: String): Boolean {
-        return check(singleSign, minClickDelayTime.toLong())
-    }
-
-    fun check(singleSign: String, delayTime: Long): Boolean {
+    fun check(singleSign: String?): Boolean {
+        if (singleSign == null) return false
         val currentTime = Calendar.getInstance().timeInMillis
         return if (!lastClickTimeMap.containsKey(singleSign)) {
             lastClickTimeMap[singleSign] = currentTime
@@ -41,7 +34,7 @@ class OneClickUtil {
         } else {
             val preTime = lastClickTimeMap[singleSign]
             if (preTime != null) {
-                if (currentTime - preTime > delayTime) {
+                if (currentTime - preTime > minClickDelayTime.toLong()) {
                     lastClickTimeMap[singleSign] = currentTime
                     false
                 } else {

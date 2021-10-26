@@ -1,8 +1,8 @@
 <resources>
     <string name="app_name">AndroidBaseConfig</string>
 
-    <string name="loading">正在加载...</string>
-    <string name="photo_can_not_write">图片生成失败！</string>
-    <string name="sdk_not_exist">内存卡不存在！</string>
+    <string name="shrimp_loading">正在加载…</string>
+    <string name="shrimp_photo_can_not_write">图片生成失败！</string>
+    <string name="shrimp_sdk_not_exist">内存卡不存在！</string>
 
 </resources>

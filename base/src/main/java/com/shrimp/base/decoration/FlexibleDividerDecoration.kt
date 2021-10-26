@@ -343,7 +343,7 @@ abstract class FlexibleDividerDecoration(builder: Builder) : RecyclerView.ItemDe
         fun dividerSize(position: Int, parent: RecyclerView?): Int
     }
 
-    open class Builder(val context: Context) {
+    abstract class Builder(val context: Context) {
         protected var resources: Resources
         var paintProvider: PaintProvider? = null
         var colorProvider: ColorProvider? = null
@@ -442,6 +442,8 @@ abstract class FlexibleDividerDecoration(builder: Builder) : RecyclerView.ItemDe
                 require(sizeProvider == null) { "Use setStrokeWidth method of Paint class to specify line size. Do not provider SizeProvider if you set PaintProvider." }
             }
         }
+
+        abstract fun build(): FlexibleDividerDecoration
 
         init {
             resources = context.resources

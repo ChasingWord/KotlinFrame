@@ -1,4 +1,4 @@
-package com.hebao.testkotlin
+package com.hebao.testkotlin.view.main
 
 import android.os.Bundle
 import android.view.Menu
@@ -9,7 +9,10 @@ import androidx.navigation.ui.AppBarConfiguration
 import androidx.navigation.ui.navigateUp
 import androidx.navigation.ui.setupActionBarWithNavController
 import com.google.android.material.snackbar.Snackbar
+import com.hebao.testkotlin.R
 import com.hebao.testkotlin.databinding.ActivityMainBinding
+import com.hebao.testkotlin.view.sub.SecondActivity
+import com.shrimp.base.view.BaseActivity.Companion.start
 import com.shrimp.network.RequestManager
 import com.shrimp.network.callback.AbstractStringCallBack
 import kotlinx.coroutines.CoroutineScope
@@ -32,18 +35,8 @@ class MainActivity : AppCompatActivity() {
         appBarConfiguration = AppBarConfiguration(navController.graph)
         setupActionBarWithNavController(navController, appBarConfiguration)
 
-        binding.fab.setOnClickListener { view ->
-            RequestManager.getData(object : AbstractStringCallBack() {
-                override fun onSuccess(data: String) {
-                    Snackbar.make(view, data, Snackbar.LENGTH_LONG)
-                        .setAction("Action", null).show()
-                }
-
-                override fun onFail(msg: String) {
-                    Snackbar.make(view, msg, Snackbar.LENGTH_LONG)
-                        .setAction("Action", null).show()
-                }
-            }, viewModelScope = CoroutineScope(Dispatchers.IO))
+        binding.fab.setOnClickListener {
+            SecondActivity.start(this)
         }
     }
 

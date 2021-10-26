@@ -178,8 +178,7 @@ class HorizontalDividerItemDecoration(builder: Builder) : FlexibleDividerDecorat
             return marginResId(horizontalMarginId, horizontalMarginId)
         }
 
-        fun build(): HorizontalDividerItemDecoration {
-            checkBuilderParams()
+        override fun build(): FlexibleDividerDecoration {
             return HorizontalDividerItemDecoration(this)
         }
     }

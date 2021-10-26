@@ -6,7 +6,6 @@ import android.graphics.Bitmap
 import android.media.MediaMetadataRetriever
 import com.shrimp.base.view.AbstractLifeCycleListener
 import com.shrimp.base.view.BaseActivity
-import com.shrimp.base.view.BaseFragmentActivity
 import kotlinx.coroutines.*
 import java.io.File
 import java.io.FileOutputStream
@@ -53,9 +52,7 @@ object VideoUtil {
                         }
                     }
                 }
-            if (context is BaseActivity) {
-                context.addLifeCycleListener(lifeCycleListener)
-            } else if (context is BaseFragmentActivity) {
+            if (context is BaseActivity<*, *>) {
                 context.addLifeCycleListener(lifeCycleListener)
             }
 
@@ -89,9 +86,7 @@ object VideoUtil {
                 if (context is Activity && context.isFinishing) return@launch
                 listener?.onLoadImage(context, file)
                 mTaskList.remove(context.toString() + videoPath)
-                if (context is BaseActivity)
-                    context.removeLifeCycleListener(lifeCycleListener)
-                else if(context is BaseFragmentActivity)
+                if (context is BaseActivity<*, *>)
                     context.removeLifeCycleListener(lifeCycleListener)
             }
             mTaskList[context.toString() + videoPath] = launch

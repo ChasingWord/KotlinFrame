@@ -18,7 +18,12 @@ ext {
             constraintlayout       : "androidx.constraintlayout:constraintlayout:2.0.4",
             navigationFragment     : "androidx.navigation:navigation-fragment-ktx:2.3.5",
             navigationUI           : "androidx.navigation:navigation-ui-ktx:2.3.5",
+
             lifecycle              : "androidx.lifecycle:lifecycle-extensions:2.2.0",
+            lifecycleVM            : "androidx.lifecycle:lifecycle-viewmodel:2.2.0",
+            lifecycleLD            : "androidx.lifecycle:lifecycle-livedata:2.2.0",
+            lifecycleVMSaveState   : "androidx.lifecycle:lifecycle-viewmodel-savedstate:2.2.0",
+            lifecycleCompiler      : "androidx.lifecycle:lifecycle-compiler:2.2.0",
 
             kotlinCoroutinesCore   : "org.jetbrains.kotlinx:kotlinx-coroutines-core:1.3.0",
             kotlinCoroutinesAndroid: "org.jetbrains.kotlinx:kotlinx-coroutines-android:1.3.0",
@@ -37,7 +42,7 @@ buildscript {
         mavenCentral()
     }
     dependencies {
-        classpath "com.android.tools.build:gradle:7.0.1"
+        classpath 'com.android.tools.build:gradle:7.0.3'
         classpath 'org.jetbrains.kotlin:kotlin-gradle-plugin:1.5.31'
 
         // NOTE: Do not place your application dependencies here; they belong

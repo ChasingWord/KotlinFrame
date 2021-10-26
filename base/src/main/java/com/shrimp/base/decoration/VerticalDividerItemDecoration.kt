@@ -175,7 +175,7 @@ class VerticalDividerItemDecoration(builder: Builder) : FlexibleDividerDecoratio
             return marginResId(verticalMarginId, verticalMarginId)
         }
 
-        fun build(): VerticalDividerItemDecoration {
+        override fun build(): VerticalDividerItemDecoration {
             checkBuilderParams()
             return VerticalDividerItemDecoration(this)
         }

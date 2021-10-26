@@ -3,7 +3,7 @@ package com.shrimp.base.view
 /**
  * Created by chasing on 2021/10/19.
  */
-interface IBaseView {
+interface ILifeCycle {
     fun onCreate()
     fun onStart()
     fun onResume()

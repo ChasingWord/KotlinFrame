@@ -1,0 +1,62 @@
+<?xml version="1.0" encoding="utf-8"?>
+<layout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    tools:context=".view.sub.SecondActivity">
+
+    <data>
+
+        <variable
+            name="vm"
+            type="com.hebao.testkotlin.view.sub.SecondViewModel" />
+    </data>
+
+    <androidx.constraintlayout.widget.ConstraintLayout
+        android:layout_width="match_parent"
+        android:layout_height="match_parent">
+
+        <RelativeLayout
+            android:id="@+id/toolbar_root"
+            android:layout_width="match_parent"
+            android:layout_height="44dp"
+            app:layout_constraintTop_toTopOf="parent">
+
+            <ImageButton
+                android:layout_width="wrap_content"
+                android:layout_height="match_parent"
+                android:layout_centerVertical="true"
+                android:background="@color/transparent"
+                android:onClick="clickBack"
+                android:paddingStart="10dp"
+                android:paddingEnd="10dp"
+                android:src="@mipmap/arrow_left_60" />
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_centerInParent="true"
+                android:text="@{vm.title}"
+                android:textColor="#2c2c2c"
+                android:textSize="15sp" />
+        </RelativeLayout>
+
+        <TextView
+            android:id="@+id/text"
+            app:layout_constraintTop_toBottomOf="@id/toolbar_root"
+            app:layout_constraintStart_toStartOf="parent"
+            android:textSize="13sp"
+            android:textColor="#2c2c2c"
+            android:text="@{vm.text}"
+            android:padding="10dp"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"/>
+
+        <androidx.recyclerview.widget.RecyclerView
+            android:id="@+id/rcv"
+            android:layout_width="match_parent"
+            android:layout_height="0dp"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintTop_toBottomOf="@id/text" />
+
+    </androidx.constraintlayout.widget.ConstraintLayout>
+</layout>
