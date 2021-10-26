@@ -4,11 +4,11 @@ package com.shrimp.network.callback
  * Created by chasing on 2021/10/21.
  */
 abstract class AbstractStringCallBack:StringCallBack {
-    override fun onStart() {
+    override suspend fun onStart() {
 
     }
 
-    override fun onComplete() {
+    override suspend fun onComplete() {
 
     }
 }

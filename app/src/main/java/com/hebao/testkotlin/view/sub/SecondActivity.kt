@@ -3,6 +3,7 @@ package com.hebao.testkotlin.view.sub
 import android.content.Context
 import android.view.View
 import androidx.recyclerview.widget.LinearLayoutManager
+import androidx.recyclerview.widget.RecyclerView
 import com.hebao.testkotlin.R
 import com.hebao.testkotlin.databinding.ActivitySecondBinding
 import com.shrimp.base.decoration.HorizontalDividerItemDecoration
@@ -42,6 +43,18 @@ class SecondActivity : BaseActivity<SecondViewModel, ActivitySecondBinding>() {
 
         baseViewModel.data.observe(this, {
             secondAdapter.insertAll(it)
+        })
+
+        dataBinding.rcv.addOnScrollListener(object : RecyclerView.OnScrollListener() {
+            override fun onScrolled(recyclerView: RecyclerView, dx: Int, dy: Int) {
+                val layoutManager = recyclerView.layoutManager
+                if (layoutManager is LinearLayoutManager) {
+                    val findLastVisibleItemPosition = layoutManager.findLastVisibleItemPosition()
+                    if (findLastVisibleItemPosition + 1 == recyclerView.adapter?.itemCount) {
+                        baseViewModel.refresh(10)
+                    }
+                }
+            }
         })
     }
 

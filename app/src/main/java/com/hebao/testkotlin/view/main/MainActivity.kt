@@ -8,15 +8,13 @@ import androidx.navigation.findNavController
 import androidx.navigation.ui.AppBarConfiguration
 import androidx.navigation.ui.navigateUp
 import androidx.navigation.ui.setupActionBarWithNavController
-import com.google.android.material.snackbar.Snackbar
 import com.hebao.testkotlin.R
 import com.hebao.testkotlin.databinding.ActivityMainBinding
+import com.hebao.testkotlin.db.database.ManDatabase
+import com.hebao.testkotlin.db.entity.Man
 import com.hebao.testkotlin.view.sub.SecondActivity
-import com.shrimp.base.view.BaseActivity.Companion.start
-import com.shrimp.network.RequestManager
-import com.shrimp.network.callback.AbstractStringCallBack
-import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.GlobalScope
+import kotlinx.coroutines.launch
 
 class MainActivity : AppCompatActivity() {
 
@@ -37,6 +35,12 @@ class MainActivity : AppCompatActivity() {
 
         binding.fab.setOnClickListener {
             SecondActivity.start(this)
+        }
+        binding.fabTop.setOnClickListener {
+            GlobalScope.launch {
+                val man = Man(1, 1, true)
+                ManDatabase.getDao(applicationContext)?.insert(man)
+            }
         }
     }
 

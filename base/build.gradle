@@ -51,10 +51,9 @@ dependencies {
     api depend["lifecycleVM"]
     api depend["lifecycleLD"]
     api depend["lifecycleVMSaveState"]
-    annotationProcessor depend["lifecycleCompiler"]
+    kapt depend["lifecycleCompiler"]
 
     //协程
     api depend["kotlinCoroutinesCore"]
     api depend["kotlinCoroutinesAndroid"]
-
 }

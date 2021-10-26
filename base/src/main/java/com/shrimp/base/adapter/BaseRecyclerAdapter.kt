@@ -8,6 +8,7 @@ import android.view.ViewGroup
 import androidx.databinding.DataBindingUtil
 import androidx.databinding.ViewDataBinding
 import androidx.recyclerview.widget.RecyclerView
+import com.shrimp.base.utils.L
 
 /**
  * Created by chasing on 2021/10/25.
@@ -43,11 +44,21 @@ abstract class BaseRecyclerAdapter<T>(var context: Context) :
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): RecyclerView.ViewHolder {
         return if (isMultiItemType) {
             val layoutId1 = recyclerMultiItemTypeSupport.getLayoutId(viewType)
-            val dataBinding = DataBindingUtil.inflate<ViewDataBinding>(LayoutInflater.from(parent.context),layoutId1, parent,false)
+            val dataBinding = DataBindingUtil.inflate<ViewDataBinding>(
+                LayoutInflater.from(parent.context),
+                layoutId1,
+                parent,
+                false
+            )
             recyclerMultiItemTypeSupport.dataBindingMap[dataBinding.root] = dataBinding
             object : RecyclerView.ViewHolder(dataBinding.root) {}
         } else {
-            dataBinding = DataBindingUtil.inflate(LayoutInflater.from(parent.context),layoutId, parent,false)
+            dataBinding = DataBindingUtil.inflate(
+                LayoutInflater.from(parent.context),
+                layoutId,
+                parent,
+                false
+            )
             object : RecyclerView.ViewHolder(dataBinding.root) {}
         }
     }
@@ -61,7 +72,8 @@ abstract class BaseRecyclerAdapter<T>(var context: Context) :
         val dataBinding =
             if (isMultiItemType) recyclerMultiItemTypeSupport.getDataBinding(holder.itemView)
             else this.dataBinding
-        convert(itemViewType, dataBinding, t)
+        if (dataBinding != null)
+            convert(itemViewType, dataBinding, t)
     }
 
     override fun onBindViewHolder(
@@ -87,7 +99,8 @@ abstract class BaseRecyclerAdapter<T>(var context: Context) :
                 truePayLoads.add(payload.toString())
                 waitDeal.add(payload)
             }
-            convertPart(itemViewType, dataBinding, t, waitDeal)
+            if (dataBinding != null)
+                convertPart(itemViewType, dataBinding, t, waitDeal)
         }
     }
 

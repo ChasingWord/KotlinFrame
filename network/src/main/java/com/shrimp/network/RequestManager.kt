@@ -2,9 +2,7 @@ package com.shrimp.network
 
 import com.shrimp.network.callback.AbstractStringCallBack
 import com.shrimp.network.engine.ExampleEngine
-import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.Deferred
-import kotlinx.coroutines.launch
+import kotlinx.coroutines.*
 
 /**
  * Created by chasing on 2021/10/21.
@@ -18,11 +16,12 @@ object RequestManager {
         viewModelScope: CoroutineScope,
         body: Deferred<String>
     ) {
-        viewModelScope.launch {
+        viewModelScope.launch(Dispatchers.Main) {
             try {
                 callBack.onStart()
-                val data = body.await()
-                callBack.onSuccess(data)
+                callBack.onSuccess(withContext(Dispatchers.IO) {
+                    body.await()
+                })
             } catch (e: Exception) {
                 callBack.onFail(e.message ?: "")
             } finally {

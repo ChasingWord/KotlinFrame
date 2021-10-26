@@ -2,7 +2,6 @@ package com.shrimp.network.engine
 
 import com.shrimp.network.RetrofitClient
 import com.shrimp.network.api.ExampleApi
-import com.shrimp.network.bean.base.ResponseResult
 import kotlinx.coroutines.Deferred
 
 /**

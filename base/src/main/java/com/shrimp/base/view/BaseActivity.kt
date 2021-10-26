@@ -27,6 +27,7 @@ abstract class BaseActivity<T : BaseViewModel, D : ViewDataBinding> : AppCompatA
     protected var oneClickUtil = OneClickUtil()
     protected var isPause = false
 
+    // 由ViewModel.isShow进行监听控制显示与隐藏
     private lateinit var dialog: ProgressDialog
     private var showLoadingTime: Long = 0
     private val handler = Handler(Looper.getMainLooper())
@@ -169,7 +170,7 @@ abstract class BaseActivity<T : BaseViewModel, D : ViewDataBinding> : AppCompatA
         lifeCycleListeners.remove(lifeCycleListener)
     }
 
-    fun showLoading() {
+    private fun showLoading() {
         if (isFinishing) return
         if (dialog.isShowing) return
         val fg: FragmentManager = supportFragmentManager
@@ -182,7 +183,7 @@ abstract class BaseActivity<T : BaseViewModel, D : ViewDataBinding> : AppCompatA
      * 如果showLoading的时间与hideLoading的时间相差太接近可能导致在调用dismiss的时候dialog还没有正真显示出来
      * 而dismiss之后dialog才正真显示出来，所以进行时间差判断（如果相差0.3s内就调用hide则延迟处理）
      */
-    fun hideLoading() {
+    private fun hideLoading() {
         if (!isFinishing && dialog.isShowing) {
             val time = System.currentTimeMillis()
             if (time - showLoadingTime < 300) {

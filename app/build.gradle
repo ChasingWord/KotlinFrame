@@ -45,4 +45,9 @@ dependencies {
     implementation depend["constraintlayout"]
     implementation depend["navigationFragment"]
     implementation depend["navigationUI"]
+
+    //room数据库
+    implementation depend["roomRuntime"]
+    kapt depend["roomCompiler"]
+    implementation depend["roomKtx"]
 }

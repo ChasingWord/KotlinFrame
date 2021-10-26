@@ -1,6 +1,5 @@
 package com.shrimp.network.api
 
-import com.shrimp.network.bean.base.ResponseResult
 import kotlinx.coroutines.Deferred
 import retrofit2.http.POST
 

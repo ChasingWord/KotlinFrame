@@ -1,6 +1,6 @@
 package com.shrimp.network.callback
 
-import com.shrimp.network.bean.base.ResponseResult
+import com.shrimp.network.entity.base.ResponseResult
 
 /**
  * Created by chasing on 2021/10/21.

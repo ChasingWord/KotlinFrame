@@ -11,7 +11,7 @@ internal interface IRecyclerMultiItemTypeSupport<T> {
 
     fun getItemType(t: T, position: Int): Int
     fun getLayoutId(type: Int):Int
-    fun getDataBinding(view: View): ViewDataBinding
+    fun getDataBinding(view: View): ViewDataBinding?
     /**
      * 是否需要处理itemView
      *

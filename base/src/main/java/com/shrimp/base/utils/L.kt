@@ -7,7 +7,7 @@ import java.lang.StringBuilder
 /**
  * Created by chasing on 2021/10/22.
  */
-class L {
+object L {
 
     fun v(t: Throwable?) {
         log(Log.VERBOSE, t, null)

@@ -9,5 +9,5 @@ import androidx.databinding.ViewDataBinding
 abstract class AbstractMultiItemTypeSupport<T> : IRecyclerMultiItemTypeSupport<T> {
     override var dataBindingMap:MutableMap<View, ViewDataBinding> =HashMap()
 
-    override fun getDataBinding(view: View): ViewDataBinding = dataBindingMap[view]!!
+    override fun getDataBinding(view: View): ViewDataBinding? = dataBindingMap[view]
 }

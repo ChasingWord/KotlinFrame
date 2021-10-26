@@ -13,7 +13,7 @@ import androidx.annotation.NonNull
 /**
  * Created by chasing on 2021/10/22.
  */
-class GenericTools {
+object GenericTools {
     /**
      * 返回屏幕高度（不包含虚拟导航栏）
      */
