@@ -9,5 +9,5 @@ import retrofit2.http.POST
 interface ExampleApi {
 
     @POST("app/homepage/GetWebHomePageSearchPresetWord")
-    fun getData() : Deferred<String>
+    fun getDataAsync() : Deferred<String>
 }

@@ -2,15 +2,15 @@ package com.shrimp.network.engine
 
 import com.shrimp.network.RetrofitClient
 import com.shrimp.network.api.ExampleApi
-import kotlinx.coroutines.Deferred
+import kotlinx.coroutines.cancel
 
 /**
  * Created by chasing on 2021/10/21.
  */
 class ExampleEngine {
-    var mApi: ExampleApi = RetrofitClient.getRetrofit().create(ExampleApi::class.java);
+    private var mApi: ExampleApi = RetrofitClient.getRetrofit().create(ExampleApi::class.java)
 
-    fun getData(): Deferred<String> {
-        return mApi.getData()
+    suspend fun getData(): String {
+        return mApi.getDataAsync().await()
     }
 }

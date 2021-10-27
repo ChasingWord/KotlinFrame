@@ -14,13 +14,13 @@ object RequestManager {
     private fun observerCallBack(
         callBack: AbstractStringCallBack,
         viewModelScope: CoroutineScope,
-        body: Deferred<String>
+        call: suspend () -> String
     ) {
         viewModelScope.launch(Dispatchers.Main) {
             try {
                 callBack.onStart()
                 callBack.onSuccess(withContext(Dispatchers.IO) {
-                    body.await()
+                    call.invoke()
                 })
             } catch (e: Exception) {
                 callBack.onFail(e.message ?: "")
@@ -34,7 +34,9 @@ object RequestManager {
     fun getData(callBack: AbstractStringCallBack, viewModelScope: CoroutineScope) {
         if (!::exampleEngine.isInitialized)
             exampleEngine = ExampleEngine()
-        observerCallBack(callBack, viewModelScope, exampleEngine.getData())
+        observerCallBack(callBack, viewModelScope){
+            exampleEngine.getData()
+        }
     }
     // endregion
 
