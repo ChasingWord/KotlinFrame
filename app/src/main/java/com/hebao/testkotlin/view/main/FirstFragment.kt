@@ -8,11 +8,14 @@ import android.view.ViewGroup
 import androidx.navigation.fragment.findNavController
 import com.hebao.testkotlin.R
 import com.hebao.testkotlin.databinding.FragmentFirstBinding
+import com.scwang.smart.refresh.layout.api.RefreshLayout
+import com.scwang.smart.refresh.layout.listener.OnRefreshListener
+import kotlinx.coroutines.*
 
 /**
  * A simple [Fragment] subclass as the default destination in the navigation.
  */
-class FirstFragment : Fragment() {
+class FirstFragment : Fragment(), OnRefreshListener {
 
     private var _binding: FragmentFirstBinding? = null
 
@@ -32,14 +35,25 @@ class FirstFragment : Fragment() {
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
-
         binding.buttonFirst.setOnClickListener {
             findNavController().navigate(R.id.action_FirstFragment_to_SecondFragment)
         }
+
+        binding.refreshLayout.setOnRefreshListener(this)
+        binding.refreshLayout.setEnableLoadMoreWhenContentNotFull(true)
     }
 
     override fun onDestroyView() {
         super.onDestroyView()
         _binding = null
+    }
+
+    override fun onRefresh(refreshLayout: RefreshLayout) {
+        CoroutineScope(Dispatchers.IO).launch {
+            delay(2000)
+            withContext(Dispatchers.Main){
+                binding.refreshLayout.finishRefresh(false)
+            }
+        }
     }
 }

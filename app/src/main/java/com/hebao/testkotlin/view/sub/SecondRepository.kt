@@ -9,12 +9,17 @@ import com.shrimp.network.callback.AbstractStringCallBack
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.runBlocking
 
 /**
  * Created by chasing on 2021/10/26.
  */
 class SecondRepository {
-    fun getData(context: Context, callBack: AbstractStringCallBack, viewModelScope: CoroutineScope) {
+    fun getData(
+        context: Context,
+        callBack: AbstractStringCallBack,
+        viewModelScope: CoroutineScope
+    ) {
         viewModelScope.launch(Dispatchers.IO) {
             val manDao = ManDatabase.getDao(context.applicationContext)
             val loadMan = manDao?.loadMan()
@@ -25,6 +30,8 @@ class SecondRepository {
 
             val i = 1
         }
-        RequestManager.getData(callBack, viewModelScope)
+
+        val job = RequestManager.getData(callBack, viewModelScope)
+        job.cancel()
     }
 }

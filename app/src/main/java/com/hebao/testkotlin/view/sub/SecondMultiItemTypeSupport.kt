@@ -1,7 +1,7 @@
 package com.hebao.testkotlin.view.sub
 
 import com.hebao.testkotlin.R
-import com.shrimp.base.adapter.AbstractMultiItemTypeSupport
+import com.shrimp.base.adapter.recycler.AbstractMultiItemTypeSupport
 
 /**
  * Created by chasing on 2021/10/26.

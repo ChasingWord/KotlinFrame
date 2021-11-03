@@ -41,7 +41,9 @@ ext {
 
             roomRuntime            : "androidx.room:room-runtime:$roomVersion",
             roomCompiler           : "androidx.room:room-compiler:$roomVersion",
-            roomKtx                : "androidx.room:room-ktx:$roomVersion"
+            roomKtx                : "androidx.room:room-ktx:$roomVersion",
+
+            refresh                : "com.scwang.smart:refresh-layout-kernel:2.0.1"
     ]
 }
 

@@ -13,8 +13,8 @@ import com.hebao.testkotlin.databinding.ActivityMainBinding
 import com.hebao.testkotlin.db.database.ManDatabase
 import com.hebao.testkotlin.db.entity.Man
 import com.hebao.testkotlin.view.sub.SecondActivity
-import kotlinx.coroutines.GlobalScope
-import kotlinx.coroutines.launch
+import com.shrimp.base.utils.L
+import kotlinx.coroutines.*
 
 class MainActivity : AppCompatActivity() {
 
@@ -33,15 +33,38 @@ class MainActivity : AppCompatActivity() {
         appBarConfiguration = AppBarConfiguration(navController.graph)
         setupActionBarWithNavController(navController, appBarConfiguration)
 
+        var job : Job? = null
         binding.fab.setOnClickListener {
-            SecondActivity.start(this)
+//            SecondActivity.start(this)
+
+            job = CoroutineScope(Dispatchers.IO).launch {
+                    // 在后台启动一个新的协程并继续
+                    try {
+                        world()
+                    } catch (e: Exception) {
+                        if (e is CancellationException)
+                            L.e("CancellationException")
+                        else
+                            L.e("OtherException")
+                    } finally {
+                        L.e("finally")
+                    }
+                }
+                L.e("Hello,")
         }
         binding.fabTop.setOnClickListener {
             GlobalScope.launch {
-                val man = Man(1, 1, true)
-                ManDatabase.getDao(applicationContext)?.insert(man)
+//                val man = Man(1, 1, true)
+//                ManDatabase.getDao(applicationContext)?.insert(man)
+
+                job?.cancel()
             }
         }
+    }
+
+    suspend fun world(){
+        delay(3000L)
+        L.e("World!")
     }
 
     override fun onCreateOptionsMenu(menu: Menu): Boolean {

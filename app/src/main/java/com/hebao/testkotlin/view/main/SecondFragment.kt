@@ -8,6 +8,7 @@ import android.view.ViewGroup
 import androidx.navigation.fragment.findNavController
 import com.hebao.testkotlin.R
 import com.hebao.testkotlin.databinding.FragmentSecondBinding
+import com.shrimp.base.adapter.viewpager.FragmentPagerWithTitlesAdapter
 
 /**
  * A simple [Fragment] subclass as the second destination in the navigation.
@@ -23,7 +24,7 @@ class SecondFragment : Fragment() {
     override fun onCreateView(
             inflater: LayoutInflater, container: ViewGroup?,
             savedInstanceState: Bundle?
-    ): View? {
+    ): View {
 
         _binding = FragmentSecondBinding.inflate(inflater, container, false)
         return binding.root
@@ -36,6 +37,17 @@ class SecondFragment : Fragment() {
         binding.buttonSecond.setOnClickListener {
             findNavController().navigate(R.id.action_SecondFragment_to_FirstFragment)
         }
+
+
+        val fragmentList = ArrayList<Fragment>()
+        var fragment = ViewPagerFragment()
+        fragmentList.add(fragment)
+        fragment = ViewPagerFragment()
+        fragmentList.add(fragment)
+        fragment = ViewPagerFragment()
+        fragmentList.add(fragment)
+        binding.viewPager.adapter=FragmentPagerWithTitlesAdapter(childFragmentManager, fragmentList, arrayOf("1", "2", "3"))
+        binding.tabLayout.setViewPager(binding.viewPager)
     }
 
     override fun onDestroyView() {

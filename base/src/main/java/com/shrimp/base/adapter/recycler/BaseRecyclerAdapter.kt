@@ -1,4 +1,4 @@
-package com.shrimp.base.adapter
+package com.shrimp.base.adapter.recycler
 
 import android.annotation.SuppressLint
 import android.content.Context
@@ -8,7 +8,6 @@ import android.view.ViewGroup
 import androidx.databinding.DataBindingUtil
 import androidx.databinding.ViewDataBinding
 import androidx.recyclerview.widget.RecyclerView
-import com.shrimp.base.utils.L
 
 /**
  * Created by chasing on 2021/10/25.

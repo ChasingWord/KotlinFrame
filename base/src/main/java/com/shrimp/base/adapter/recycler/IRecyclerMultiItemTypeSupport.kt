@@ -1,4 +1,4 @@
-package com.shrimp.base.adapter
+package com.shrimp.base.adapter.recycler
 
 import android.view.View
 import androidx.databinding.ViewDataBinding

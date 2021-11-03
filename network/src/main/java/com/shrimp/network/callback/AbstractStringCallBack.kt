@@ -8,6 +8,10 @@ abstract class AbstractStringCallBack:StringCallBack {
 
     }
 
+    override suspend fun onCancel() {
+
+    }
+
     override suspend fun onComplete() {
 
     }

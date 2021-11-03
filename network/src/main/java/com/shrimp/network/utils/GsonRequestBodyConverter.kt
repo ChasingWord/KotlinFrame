@@ -15,7 +15,7 @@ import java.nio.charset.StandardCharsets
 /**
  * Created by chasing on 2021/10/21.
  */
-class GsonRequestBodyConverter<T>(private val gson: Gson?, private val adapter: TypeAdapter<T>?): Converter<T, RequestBody> {
+class GsonRequestBodyConverter<T>(private val gson: Gson, private val adapter: TypeAdapter<T>): Converter<T, RequestBody> {
     private val mediaType = MediaType.parse("application/json; charset=UTF-8")
     private val charset = StandardCharsets.UTF_8
 
@@ -23,8 +23,8 @@ class GsonRequestBodyConverter<T>(private val gson: Gson?, private val adapter: 
     override fun convert(@NonNull value: T): RequestBody? {
         val buffer = Buffer()
         val writer: Writer = OutputStreamWriter(buffer.outputStream(), charset)
-        val jsonWriter = gson!!.newJsonWriter(writer)
-        adapter!!.write(jsonWriter, value)
+        val jsonWriter = gson.newJsonWriter(writer)
+        adapter.write(jsonWriter, value)
         jsonWriter.close()
         return RequestBody.create(mediaType, buffer.readByteString())
     }

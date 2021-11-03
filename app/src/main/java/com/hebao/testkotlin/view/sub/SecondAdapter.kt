@@ -5,7 +5,7 @@ import androidx.databinding.ViewDataBinding
 import com.hebao.testkotlin.R
 import com.hebao.testkotlin.databinding.ItemSecond2Binding
 import com.hebao.testkotlin.databinding.ItemSecondBinding
-import com.shrimp.base.adapter.BaseRecyclerAdapter
+import com.shrimp.base.adapter.recycler.BaseRecyclerAdapter
 
 /**
  * Created by chasing on 2021/10/25.
