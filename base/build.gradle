@@ -53,6 +53,8 @@ dependencies {
     api depend["lifecycleLD"]
     api depend["lifecycleVMSaveState"]
     kapt depend["lifecycleCompiler"]
+    // 替代SP
+    implementation("androidx.datastore:datastore-preferences:1.0.0")
 
     //协程
     api depend["kotlinCoroutinesCore"]

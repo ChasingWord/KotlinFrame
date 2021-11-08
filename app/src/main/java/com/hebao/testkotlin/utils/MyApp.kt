@@ -16,4 +16,9 @@ class MyApp : Application() {
         //设置全局的Footer构建器
         SmartRefreshLayout.setDefaultRefreshFooterCreator { context, _ -> SmartRefreshFooter(context) }
     }
+
+    override fun onCreate() {
+        super.onCreate()
+        CrashErrorHandler.getInstance().init(this)
+    }
 }

@@ -1,8 +1,10 @@
 package com.hebao.testkotlin.view.main
 
 import android.os.Bundle
+import android.text.TextUtils
 import android.view.Menu
 import android.view.MenuItem
+import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
 import androidx.navigation.findNavController
 import androidx.navigation.ui.AppBarConfiguration
@@ -10,22 +12,22 @@ import androidx.navigation.ui.navigateUp
 import androidx.navigation.ui.setupActionBarWithNavController
 import com.hebao.testkotlin.R
 import com.hebao.testkotlin.databinding.ActivityMainBinding
-import com.hebao.testkotlin.db.database.ManDatabase
-import com.hebao.testkotlin.db.entity.Man
-import com.hebao.testkotlin.view.sub.SecondActivity
 import com.shrimp.base.utils.L
+import com.shrimp.base.utils.ObjectCacheUtil
 import kotlinx.coroutines.*
 
 class MainActivity : AppCompatActivity() {
 
     private lateinit var appBarConfiguration: AppBarConfiguration
     private lateinit var binding: ActivityMainBinding
+    private lateinit var objectCacheUtil: ObjectCacheUtil
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
         binding = ActivityMainBinding.inflate(layoutInflater)
         setContentView(binding.root)
+        objectCacheUtil = ObjectCacheUtil(this)
 
         setSupportActionBar(binding.toolbar)
 
@@ -33,36 +35,50 @@ class MainActivity : AppCompatActivity() {
         appBarConfiguration = AppBarConfiguration(navController.graph)
         setupActionBarWithNavController(navController, appBarConfiguration)
 
-        var job : Job? = null
+        var job: Job? = null
         binding.fab.setOnClickListener {
 //            SecondActivity.start(this)
 
             job = CoroutineScope(Dispatchers.IO).launch {
-                    // 在后台启动一个新的协程并继续
-                    try {
-                        world()
-                    } catch (e: Exception) {
-                        if (e is CancellationException)
-                            L.e("CancellationException")
-                        else
-                            L.e("OtherException")
-                    } finally {
-                        L.e("finally")
-                    }
+                // 在后台启动一个新的协程并继续
+                try {
+                    world()
+                } catch (e: Exception) {
+                    if (e is CancellationException)
+                        L.e("CancellationException")
+                    else
+                        L.e("OtherException")
+                } finally {
+                    L.e("finally")
                 }
-                L.e("Hello,")
+            }
+            L.e("Hello,")
+
+            CoroutineScope(Dispatchers.IO).launch {
+                objectCacheUtil.remove("key", String::class)
+                objectCacheUtil.read<Int>("key_int") {
+                    Toast.makeText(this@MainActivity, it.toString(), Toast.LENGTH_SHORT).show()
+                }
+            }
         }
         binding.fabTop.setOnClickListener {
-            GlobalScope.launch {
+            CoroutineScope(Dispatchers.IO).launch {
 //                val man = Man(1, 1, true)
 //                ManDatabase.getDao(applicationContext)?.insert(man)
 
                 job?.cancel()
             }
+
+            CoroutineScope(Dispatchers.IO).launch {
+                objectCacheUtil.read<String>("key") {
+                    if (!TextUtils.isEmpty(it))
+                        Toast.makeText(this@MainActivity, it, Toast.LENGTH_SHORT).show()
+                }
+            }
         }
     }
 
-    suspend fun world(){
+    suspend fun world() {
         delay(3000L)
         L.e("World!")
     }
