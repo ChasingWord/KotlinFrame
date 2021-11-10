@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <paths>
+        <root-path
+            name="root"
+            path="."/>
+        <!--<external-path-->
+            <!--name="files_root"-->
+            <!--path="Android/data/com.suvee.cgxueba/"/>-->
+        <!--<external-path-->
+            <!--name="external_storage_root"-->
+            <!--path="."/>-->
+        <!--<external-path-->
+            <!--name="download"-->
+            <!--path="."/>-->
+        <!--<external-path-->
+            <!--name="external_files"-->
+            <!--path="."/>-->
+    </paths>
+</resources>

@@ -4,12 +4,10 @@ import android.content.Context
 import androidx.datastore.core.DataStore
 import androidx.datastore.preferences.core.*
 import androidx.datastore.preferences.preferencesDataStore
-import kotlinx.coroutines.CancellationException
-import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.*
 import kotlinx.coroutines.flow.catch
 import kotlinx.coroutines.flow.collect
 import kotlinx.coroutines.flow.map
-import kotlinx.coroutines.withContext
 import java.io.IOException
 import kotlin.reflect.KClass
 
@@ -25,7 +23,7 @@ class ObjectCacheUtil(val context: Context) {
      * 目的：避免一直处于监听状态
      * 数据在读取到之后会切换协程Context到Main回调方法
      */
-    suspend inline fun <reified T> read(key: String, crossinline func: (T) -> Unit) =
+    suspend inline fun <reified T> read(key: String, crossinline func: (T) -> Unit) = coroutineScope {
         context.dataStore.data
             .catch {
                 // 当读取数据遇到错误时，如果是 `IOException` 异常，发送一个 emptyPreferences 来重新使用
@@ -33,7 +31,7 @@ class ObjectCacheUtil(val context: Context) {
                 if (it is IOException) {
                     it.printStackTrace()
                     emit(emptyPreferences())
-                } else if (it !is CancellationException) {
+                } else {
                     throw it
                 }
             }
@@ -53,8 +51,9 @@ class ObjectCacheUtil(val context: Context) {
                 withContext(Dispatchers.Main) {
                     func.invoke(it as T)
                 }
-                throw CancellationException()
+                cancel()
             }
+    }
 
     suspend fun save(key: String, value: Any) {
         context.dataStore.edit { mutablePreferences ->

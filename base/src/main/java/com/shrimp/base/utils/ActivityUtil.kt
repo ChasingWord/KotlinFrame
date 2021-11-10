@@ -25,8 +25,9 @@ import androidx.core.app.ActivityCompat
 import androidx.core.app.NotificationCompat
 import com.shrimp.base.R
 import com.shrimp.base.receiver.NotificationClickReceiver
-import kotlinx.coroutines.*
-import kotlinx.coroutines.flow.collect
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.launch
 import java.io.File
 import java.util.*
 import kotlin.system.exitProcess
@@ -213,8 +214,8 @@ object ActivityUtil {
     fun takePhoto(activity: Activity): String? {
         if (requestPermission(activity, Manifest.permission.CAMERA)) return null
         try {
-            val filePath: String = FileUtil.getTempPath(activity)
-                .toString() + File.separator + FileUtil.getPhotoFileName()
+            val filePath: String =
+                FileUtil.getTempPath(activity) + File.separator + FileUtil.getPhotoFileName()
             val takePhotoIntent = Intent(MediaStore.ACTION_IMAGE_CAPTURE)
             val uri = FileUtil.getFileUri(activity, filePath)
             if (uri != null) {
@@ -455,61 +456,22 @@ object ActivityUtil {
     // WRITE_EXTERNAL_STORAGE权限包含了READ_EXTERNAL_STORAGE，所以只进行WRITE_EXTERNAL_STORAGE权限请求即可
     @SuppressLint("CheckResult")
     fun requestPermission(activity: Activity, vararg permission: String): Boolean =
-        runBlocking(Dispatchers.IO) {
-            // 6.0以下不需要请求权限，AndroidManifest有写即可
-            when {
-                Build.VERSION.SDK_INT < Build.VERSION_CODES.M -> false
-                permission.isNotEmpty() -> {
-                    var needRequest = false
-                    val needRequestPermission = ArrayList<String>()
-                    for (permissionItem in permission) {
-                        if (ActivityCompat.checkSelfPermission(
-                                activity,
-                                permissionItem
-                            ) != PackageManager.PERMISSION_GRANTED
-                        ) {
-                            needRequest = true
-                            // 必须申请过一次之后该方法才会返回正确状态，没有申请过也是返回false
-                            // 请求过被永久拒绝返回false，请求过被普通拒绝返回true
-                            if (!ActivityCompat.shouldShowRequestPermissionRationale(
-                                    activity,
-                                    permissionItem
-                                )
-                            ) { //被永久拒绝--需要显示请求理由
-                                val objectCacheUtil = ObjectCacheUtil(activity)
-                                var toastString: String
-                                when (permissionItem) {
-                                    Manifest.permission.WRITE_EXTERNAL_STORAGE, Manifest.permission.READ_EXTERNAL_STORAGE -> {
-                                        toastString = "请前往手机系统设置界面进行设置存储权限！"
-                                    }
-                                    Manifest.permission.CAMERA -> {
-                                        toastString = "请前往手机系统设置界面进行设置拍照权限！"
-                                    }
-                                    Manifest.permission.CALL_PHONE -> {
-                                        toastString = "请前往手机系统设置界面进行设置拨打电话权限！"
-                                    }
-                                    Manifest.permission.WRITE_CALENDAR -> {
-                                        toastString = "请前往手机系统设置界面进行设置读写日历权限！"
-                                    }
-                                    else -> {
-                                        toastString = "请前往手机系统设置界面进行设置相应权限！"
-                                    }
-                                }
-
-                                objectCacheUtil.read<Boolean>(permissionItem) {
-                                    if (!it) {
-                                        needRequestPermission.add(permissionItem)
-                                        CoroutineScope(Dispatchers.IO).launch {
-                                            objectCacheUtil.save(permissionItem, true)
-                                        }
-                                    } else showToast(activity, toastString)
-                                }
-                            } else needRequestPermission.add(permissionItem)
-                        }
-                    }
-                    if (CollectionUtil.isNotEmpty(needRequestPermission)) {
+        // 6.0以下不需要请求权限，AndroidManifest有写即可
+        when {
+            Build.VERSION.SDK_INT < Build.VERSION_CODES.M -> false
+            permission.isNotEmpty() -> {
+                var needRequest = false
+                val needRequestPermission = ArrayList<String>()
+                for (permissionItem in permission) {
+                    if (ActivityCompat.checkSelfPermission(
+                            activity,
+                            permissionItem
+                        ) != PackageManager.PERMISSION_GRANTED
+                    ) {
+                        needRequest = true
+                        needRequestPermission.add(permissionItem)
                         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
-                            withContext(Dispatchers.Main) {
+                            CoroutineScope(Dispatchers.Main).launch {
                                 try {
                                     activity.requestPermissions(
                                         needRequestPermission.toTypedArray(),
@@ -520,10 +482,10 @@ object ActivityUtil {
                             }
                         }
                     }
-                    needRequest
                 }
-                else -> false
+                needRequest
             }
+            else -> false
         }
 
     //检测是否需要请求存储权限，true是则自动进行请求

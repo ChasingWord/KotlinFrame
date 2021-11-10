@@ -1,12 +1,15 @@
 package com.shrimp.base.view
 
+import android.Manifest
 import android.app.Activity
 import android.content.Context
 import android.content.Intent
+import android.content.pm.PackageManager
 import android.os.Bundle
 import android.os.Handler
 import android.os.Looper
 import androidx.appcompat.app.AppCompatActivity
+import androidx.core.app.ActivityCompat
 import androidx.core.content.ContextCompat
 import androidx.databinding.ViewDataBinding
 import androidx.fragment.app.FragmentManager
@@ -194,6 +197,40 @@ abstract class BaseActivity<T : BaseViewModel, D : ViewDataBinding> : AppCompatA
                 }, 300 - (time - showLoadingTime))
             } else {
                 dialog.dismiss()
+            }
+        }
+    }
+
+    override fun onRequestPermissionsResult(
+        requestCode: Int,
+        permissions: Array<out String>,
+        grantResults: IntArray
+    ) {
+        super.onRequestPermissionsResult(requestCode, permissions, grantResults)
+        for(i in grantResults.indices){
+            if (grantResults[i] == PackageManager.PERMISSION_DENIED){
+                if (!ActivityCompat.shouldShowRequestPermissionRationale(this, permissions[i])){
+                    // 被永久拒绝--需要显示请求理由
+                    var toastString: String
+                    when (permissions[i]) {
+                        Manifest.permission.WRITE_EXTERNAL_STORAGE, Manifest.permission.READ_EXTERNAL_STORAGE -> {
+                            toastString = "请前往手机系统设置界面进行设置存储权限！"
+                        }
+                        Manifest.permission.CAMERA -> {
+                            toastString = "请前往手机系统设置界面进行设置拍照权限！"
+                        }
+                        Manifest.permission.CALL_PHONE -> {
+                            toastString = "请前往手机系统设置界面进行设置拨打电话权限！"
+                        }
+                        Manifest.permission.WRITE_CALENDAR -> {
+                            toastString = "请前往手机系统设置界面进行设置读写日历权限！"
+                        }
+                        else -> {
+                            toastString = "请前往手机系统设置界面进行设置相应权限！"
+                        }
+                    }
+                    ActivityUtil.showToast(this, toastString)
+                }
             }
         }
     }

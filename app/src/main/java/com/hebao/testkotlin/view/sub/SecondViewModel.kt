@@ -18,7 +18,8 @@ class SecondViewModel(application: Application) : BaseViewModel(application) {
     private var repository = SecondRepository()
 
     override fun loadingData() {
-        repository.getData(getApplication(), object : AbstractStringCallBack() {
+        repository.getLocalData(getApplication(), viewModelScope)
+        repository.getData(object : AbstractStringCallBack() {
             override suspend fun onStart() {
                 dialogShow.value = true
             }

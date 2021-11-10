@@ -12,6 +12,7 @@ import androidx.navigation.ui.navigateUp
 import androidx.navigation.ui.setupActionBarWithNavController
 import com.hebao.testkotlin.R
 import com.hebao.testkotlin.databinding.ActivityMainBinding
+import com.shrimp.base.utils.ActivityUtil
 import com.shrimp.base.utils.L
 import com.shrimp.base.utils.ObjectCacheUtil
 import kotlinx.coroutines.*
@@ -20,14 +21,20 @@ class MainActivity : AppCompatActivity() {
 
     private lateinit var appBarConfiguration: AppBarConfiguration
     private lateinit var binding: ActivityMainBinding
-    private lateinit var objectCacheUtil: ObjectCacheUtil
+    private lateinit var _objectCacheUtil: ObjectCacheUtil
+
+    private val objectCacheUtil :ObjectCacheUtil
+    get() {
+        if (!::_objectCacheUtil.isInitialized)
+            _objectCacheUtil = ObjectCacheUtil(this)
+        return _objectCacheUtil
+    }
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
         binding = ActivityMainBinding.inflate(layoutInflater)
         setContentView(binding.root)
-        objectCacheUtil = ObjectCacheUtil(this)
 
         setSupportActionBar(binding.toolbar)
 
@@ -37,23 +44,23 @@ class MainActivity : AppCompatActivity() {
 
         var job: Job? = null
         binding.fab.setOnClickListener {
-//            SecondActivity.start(this)
+//             ActivityUtil.takePhoto(this)
 
-            job = CoroutineScope(Dispatchers.IO).launch {
-                // 在后台启动一个新的协程并继续
-                try {
-                    world()
-                } catch (e: Exception) {
-                    if (e is CancellationException)
-                        L.e("CancellationException")
-                    else
-                        L.e("OtherException")
-                } finally {
-                    L.e("finally")
-                }
-            }
-            L.e("Hello,")
-
+//            job = CoroutineScope(Dispatchers.IO).launch {
+//                // 在后台启动一个新的协程并继续
+//                try {
+//                    world()
+//                } catch (e: Exception) {
+//                    if (e is CancellationException)
+//                        L.e("CancellationException")
+//                    else
+//                        L.e("OtherException")
+//                } finally {
+//                    L.e("finally")
+//                }
+//            }
+//            L.e("Hello,")
+//
             CoroutineScope(Dispatchers.IO).launch {
                 objectCacheUtil.remove("key", String::class)
                 objectCacheUtil.read<Int>("key_int") {
@@ -62,23 +69,53 @@ class MainActivity : AppCompatActivity() {
             }
         }
         binding.fabTop.setOnClickListener {
-            CoroutineScope(Dispatchers.IO).launch {
-//                val man = Man(1, 1, true)
-//                ManDatabase.getDao(applicationContext)?.insert(man)
+            main()
 
-                job?.cancel()
-            }
+//            CoroutineScope(Dispatchers.IO).launch {
+////                val man = Man(1, 1, true)
+////                ManDatabase.getDao(applicationContext)?.insert(man)
+//
+//                job?.cancel()
+//            }
 
-            CoroutineScope(Dispatchers.IO).launch {
-                objectCacheUtil.read<String>("key") {
-                    if (!TextUtils.isEmpty(it))
-                        Toast.makeText(this@MainActivity, it, Toast.LENGTH_SHORT).show()
-                }
-            }
+//            CoroutineScope(Dispatchers.IO).launch {
+//                objectCacheUtil.read<String>("key") {
+//                    if (!TextUtils.isEmpty(it))
+//                        Toast.makeText(this@MainActivity, it, Toast.LENGTH_SHORT).show()
+//                }
+//            }
         }
     }
 
-    suspend fun world() {
+    fun main() = runBlocking { // this: CoroutineScope
+        val result = withTimeoutOrNull(1300L) {
+            repeat(40) { i ->
+                L.e("I'm sleeping $i ...")
+                delay(400L)
+            }
+            "Done" // 运行完所有代码则返回“Done”，超时则返回null
+        }
+        coroutineScope {
+            delay(3000)
+        }
+        L.e("Result is $result")
+        nmi()
+        launch {
+            L.e("after delay")
+        }
+    }
+
+    suspend fun nmi() = coroutineScope {
+        async {
+            delay(3000)
+        }
+        L.e("nmi delay")
+        async {
+            L.e("nmi asy")
+        }
+    }
+
+    private suspend fun world() {
         delay(3000L)
         L.e("World!")
     }
