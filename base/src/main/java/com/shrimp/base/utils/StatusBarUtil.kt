@@ -30,7 +30,7 @@ object StatusBarUtil {
      */
     fun setColorDiff(activity: Activity, @ColorInt color: Int) {
         setTransparentStatusBar(activity)
-        val contentView = activity.findViewById<ViewGroup>(R.id.content)
+        val contentView = activity.findViewById<ViewGroup>(android.R.id.content)
         val fakeStatusBarView = contentView.findViewById<View>(
             FAKE_STATUS_BAR_VIEW_ID
         )
@@ -47,7 +47,7 @@ object StatusBarUtil {
 
     fun setColorDiffThemeWhite(activity: Activity, @ColorInt color: Int) {
         setTransparentStatusBar(activity, false)
-        val contentView = activity.findViewById<ViewGroup>(R.id.content)
+        val contentView = activity.findViewById<ViewGroup>(android.R.id.content)
         val fakeStatusBarView = contentView.findViewById<View>(FAKE_STATUS_BAR_VIEW_ID)
         if (fakeStatusBarView != null) {
             if (fakeStatusBarView.visibility == View.GONE) {
@@ -61,7 +61,7 @@ object StatusBarUtil {
     }
 
     fun hideCustomStatusBarView(activity: Activity) {
-        val contentView = activity.findViewById<ViewGroup>(R.id.content)
+        val contentView = activity.findViewById<ViewGroup>(android.R.id.content)
         val fakeStatusBarView = contentView.findViewById<View>(
             FAKE_STATUS_BAR_VIEW_ID
         )
@@ -107,7 +107,7 @@ object StatusBarUtil {
      * 如果多个view同时设置了fitsSystemWindows，只有第一个会起作用。这是一般情况，后面会介绍特殊情况。
      */
     private fun setRootView(activity: Activity, fitsSystemWindows: Boolean) {
-        val parent = activity.findViewById<ViewGroup>(R.id.content)
+        val parent = activity.findViewById<ViewGroup>(android.R.id.content)
         var i = 0
         val count = parent.childCount
         while (i < count) {

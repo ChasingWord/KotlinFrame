@@ -11,6 +11,7 @@ import kotlinx.coroutines.launch
 
 /**
  * Created by chasing on 2021/11/10.
+ * 测试DataStore存储
  */
 class TestDatastoreActivity : BaseActivity<TestDatastoreViewModel, ActivityTestDatastoreBinding>() {
     private lateinit var _objectCacheUtil: ObjectCacheUtil
@@ -33,8 +34,7 @@ class TestDatastoreActivity : BaseActivity<TestDatastoreViewModel, ActivityTestD
 
     override fun initViewModel(): Class<TestDatastoreViewModel> = TestDatastoreViewModel::class.java
 
-    override fun initContentView(): ActivityTestDatastoreBinding =
-        ActivityTestDatastoreBinding.inflate(layoutInflater)
+    override fun initContentView(): ActivityTestDatastoreBinding = ActivityTestDatastoreBinding.inflate(layoutInflater)
 
     override fun initView() {
         dataBinding.first.setOnClickListener {
@@ -53,14 +53,14 @@ class TestDatastoreActivity : BaseActivity<TestDatastoreViewModel, ActivityTestD
 
         dataBinding.firstRead.setOnClickListener {
             CoroutineScope(Dispatchers.IO).launch {
-                objectCacheUtil.read<Int>("key") {
+                objectCacheUtil.read<String>("key") {
                     Toast.makeText(this@TestDatastoreActivity, it.toString(), Toast.LENGTH_SHORT)
                         .show()
                 }
             }
         }
 
-        dataBinding.firstRead.setOnClickListener {
+        dataBinding.secondRead.setOnClickListener {
             CoroutineScope(Dispatchers.IO).launch {
                 objectCacheUtil.read<Int>("key_int") {
                     Toast.makeText(this@TestDatastoreActivity, it.toString(), Toast.LENGTH_SHORT)

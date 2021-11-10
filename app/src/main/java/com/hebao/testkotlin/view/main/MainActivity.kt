@@ -56,6 +56,7 @@ class MainActivity : AppCompatActivity() {
 //            L.e("Hello,")
 //            job.cancel()
         }
+
         binding.fabTop.setOnClickListener {
 //            main()
 //            L.e("Task after main")
@@ -73,8 +74,8 @@ class MainActivity : AppCompatActivity() {
         }
 
         // 拖拽相关逻辑
-        binding.fab.tag = "fabTop"
-        binding.fab.setOnLongClickListener {
+        binding.fabTop.tag = "fabTop"
+        binding.fabTop.setOnLongClickListener {
             val item = ClipData.Item(it.tag as CharSequence);
 
             // Create a new ClipData using the tag as a label, the plain text MIME type, and
@@ -87,7 +88,7 @@ class MainActivity : AppCompatActivity() {
             );
 
             // Instantiates the drag shadow builder.
-            val myShadow = MyDragShadowBuilder(binding.fab);
+            val myShadow = MyDragShadowBuilder(it);
 
             // Starts the drag
 
@@ -100,9 +101,6 @@ class MainActivity : AppCompatActivity() {
             return@setOnLongClickListener true
         }
         binding.root.setOnDragListener { v, event ->
-            binding.fabTop.x = event.x
-            binding.fabTop.y = event.y
-
             //获取事件
             when (event.action) {
                 DragEvent.ACTION_DRAG_STARTED -> Log.d("aaa", "开始拖拽")
@@ -112,6 +110,8 @@ class MainActivity : AppCompatActivity() {
                 DragEvent.ACTION_DRAG_LOCATION -> {
                     val x = event.x
                     val y = event.y
+                    binding.fabTop.x = event.x - binding.fabTop.width / 2
+                    binding.fabTop.y = event.y - binding.fabTop.height / 2
                     Log.e("aaa", "拖拽的view在监听view中的位置:x =$x,y=$y")
                 }
                 DragEvent.ACTION_DROP -> Log.i("aaa", "释放拖拽的view")

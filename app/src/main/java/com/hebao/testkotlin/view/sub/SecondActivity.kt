@@ -11,6 +11,8 @@ import com.shrimp.base.view.BaseActivity
 
 /**
  * Created by chasing on 2021/10/25.
+ * 测试网络请求、RecyclerView-Adapter-MultiItemType样式
+ * 在Repository测试数据库Dao存储
  */
 class SecondActivity : BaseActivity<SecondViewModel, ActivitySecondBinding>() {
 

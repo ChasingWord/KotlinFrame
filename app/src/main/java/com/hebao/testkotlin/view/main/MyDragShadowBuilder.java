@@ -9,6 +9,7 @@ import android.view.View;
 
 /**
  * Created by chasing on 2021/11/10.
+ * 拖拽的阴影
  */
 public class MyDragShadowBuilder extends View.DragShadowBuilder {
 

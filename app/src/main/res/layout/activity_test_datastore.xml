@@ -1,5 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <layout>
+
     <androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
         xmlns:app="http://schemas.android.com/apk/res-auto"
         android:layout_width="match_parent"
@@ -9,8 +10,9 @@
             android:id="@+id/first"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_margin="40dp"
-            android:text="存Hello  1"
+            android:layout_marginTop="40dp"
+            android:text="存Hello1"
+            android:textColor="@color/black"
             android:textSize="20sp"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toTopOf="parent" />
@@ -19,28 +21,31 @@
             android:id="@+id/firstRead"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="读Key"
-            android:textSize="20sp"
             android:layout_marginStart="40dp"
+            android:text="读Key"
+            android:textColor="@color/black"
+            android:textSize="20sp"
             app:layout_constraintStart_toEndOf="@id/first"
             app:layout_constraintTop_toTopOf="@id/first" />
 
         <TextView
             android:id="@+id/firstDelete"
-            app:layout_constraintTop_toTopOf="@id/firstRead"
-            app:layout_constraintStart_toEndOf="@id/firstRead"
-            android:layout_marginStart="60dp"
-            android:textSize="20sp"
-            android:text="删除Key"
             android:layout_width="wrap_content"
-            android:layout_height="wrap_content"/>
+            android:layout_height="wrap_content"
+            android:layout_marginStart="60dp"
+            android:text="删除Key"
+            android:textColor="@color/black"
+            android:textSize="20sp"
+            app:layout_constraintStart_toEndOf="@id/firstRead"
+            app:layout_constraintTop_toTopOf="@id/firstRead" />
 
         <TextView
             android:id="@+id/second"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_marginTop="40dp"
-            android:text="存Hi  2"
+            android:text="存Hello2"
+            android:textColor="@color/black"
             android:textSize="20sp"
             app:layout_constraintStart_toStartOf="@id/first"
             app:layout_constraintTop_toBottomOf="@id/first" />
@@ -50,18 +55,20 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:text="读Key_Int"
+            android:textColor="@color/black"
             android:textSize="20sp"
             app:layout_constraintStart_toStartOf="@id/firstRead"
             app:layout_constraintTop_toTopOf="@id/second" />
 
         <TextView
             android:id="@+id/secondDelete"
-            app:layout_constraintTop_toTopOf="@id/second"
-            app:layout_constraintStart_toStartOf="@id/firstDelete"
-            android:textSize="20sp"
-            android:text="删除Key_Int"
             android:layout_width="wrap_content"
-            android:layout_height="wrap_content"/>
+            android:layout_height="wrap_content"
+            android:text="删除Key_Int"
+            android:textColor="@color/black"
+            android:textSize="20sp"
+            app:layout_constraintStart_toStartOf="@id/firstDelete"
+            app:layout_constraintTop_toTopOf="@id/second" />
 
     </androidx.constraintlayout.widget.ConstraintLayout>
 </layout>
