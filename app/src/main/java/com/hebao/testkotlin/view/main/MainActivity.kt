@@ -1,34 +1,44 @@
 package com.hebao.testkotlin.view.main
 
+import android.animation.Animator
+import android.content.ClipData
+import android.content.ClipDescription
+import android.graphics.Color
 import android.os.Bundle
-import android.text.TextUtils
-import android.view.Menu
-import android.view.MenuItem
+import android.util.Log
 import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
 import androidx.navigation.findNavController
 import androidx.navigation.ui.AppBarConfiguration
-import androidx.navigation.ui.navigateUp
 import androidx.navigation.ui.setupActionBarWithNavController
 import com.hebao.testkotlin.R
 import com.hebao.testkotlin.databinding.ActivityMainBinding
-import com.shrimp.base.utils.ActivityUtil
 import com.shrimp.base.utils.L
 import com.shrimp.base.utils.ObjectCacheUtil
 import kotlinx.coroutines.*
+
+import android.widget.FrameLayout
+
+import android.view.animation.Animation
+import android.animation.ObjectAnimator
+import android.graphics.Path
+import android.text.TextUtils
+import android.view.*
+
 
 class MainActivity : AppCompatActivity() {
 
     private lateinit var appBarConfiguration: AppBarConfiguration
     private lateinit var binding: ActivityMainBinding
     private lateinit var _objectCacheUtil: ObjectCacheUtil
+    private var name by FormatDelegate()
 
-    private val objectCacheUtil :ObjectCacheUtil
-    get() {
-        if (!::_objectCacheUtil.isInitialized)
-            _objectCacheUtil = ObjectCacheUtil(this)
-        return _objectCacheUtil
-    }
+    private val objectCacheUtil: ObjectCacheUtil
+        get() {
+            if (!::_objectCacheUtil.isInitialized)
+                _objectCacheUtil = ObjectCacheUtil(this)
+            return _objectCacheUtil
+        }
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -69,7 +79,15 @@ class MainActivity : AppCompatActivity() {
             }
         }
         binding.fabTop.setOnClickListener {
-            main()
+//            main()
+//            L.e("Task after main")
+
+            name = "abc"
+            L.e(name)
+
+            CoroutineScope(Dispatchers.IO).launch {
+                objectCacheUtil.save("key_int", 2)
+            }
 
 //            CoroutineScope(Dispatchers.IO).launch {
 ////                val man = Man(1, 1, true)
@@ -78,41 +96,76 @@ class MainActivity : AppCompatActivity() {
 //                job?.cancel()
 //            }
 
-//            CoroutineScope(Dispatchers.IO).launch {
-//                objectCacheUtil.read<String>("key") {
-//                    if (!TextUtils.isEmpty(it))
-//                        Toast.makeText(this@MainActivity, it, Toast.LENGTH_SHORT).show()
-//                }
-//            }
-        }
-    }
-
-    fun main() = runBlocking { // this: CoroutineScope
-        val result = withTimeoutOrNull(1300L) {
-            repeat(40) { i ->
-                L.e("I'm sleeping $i ...")
-                delay(400L)
+            CoroutineScope(Dispatchers.IO).launch {
+                objectCacheUtil.read<String>("key") {
+                    if (!TextUtils.isEmpty(it))
+                        Toast.makeText(this@MainActivity, it, Toast.LENGTH_SHORT).show()
+                }
             }
-            "Done" // 运行完所有代码则返回“Done”，超时则返回null
         }
-        coroutineScope {
-            delay(3000)
+
+        binding.fab.tag = "fabTop"
+        binding.fab.setOnLongClickListener {
+            val item = ClipData.Item(it.tag as CharSequence);
+
+            // Create a new ClipData using the tag as a label, the plain text MIME type, and
+            // the already-created item. This will create a new ClipDescription object within the
+            // ClipData, and set its MIME type entry to "text/plain"
+            val dragData = ClipData(
+                it.tag as CharSequence,
+                arrayOf(ClipDescription.MIMETYPE_TEXT_PLAIN),
+                item
+            );
+
+            // Instantiates the drag shadow builder.
+            val myShadow = MyDragShadowBuilder(binding.fab);
+
+            // Starts the drag
+
+            it.startDrag(
+                dragData,  // the data to be dragged
+                myShadow,  // the drag shadow builder
+                null,      // no need to use local data
+                0          // flags (not currently used, set to 0)
+            );
+            return@setOnLongClickListener true
         }
-        L.e("Result is $result")
-        nmi()
-        launch {
-            L.e("after delay")
+
+        val path = Path()
+        path.arcTo(0f, 0f, 1000f, 1000f, 270f, -180f, true)
+        val animator: ObjectAnimator = ObjectAnimator.ofFloat(binding.fabTop, View.X, View.Y, path)
+        animator.duration = 2000
+        animator.start()
+
+        binding.root.setOnDragListener { v, event ->
+            binding.fabTop.x = event.x
+            binding.fabTop.y = event.y
+
+            //获取事件
+            val action = event.action
+            when (action) {
+                DragEvent.ACTION_DRAG_STARTED -> Log.d("aaa", "开始拖拽")
+                DragEvent.ACTION_DRAG_ENDED -> Log.d("aaa", "结束拖拽")
+                DragEvent.ACTION_DRAG_ENTERED -> Log.d("aaa", "拖拽的view进入监听的view时")
+                DragEvent.ACTION_DRAG_EXITED -> Log.d("aaa", "拖拽的view退出监听的view时")
+                DragEvent.ACTION_DRAG_LOCATION -> {
+                    val x = event.x
+                    val y = event.y
+                    Log.e("aaa", "拖拽的view在监听view中的位置:x =$x,y=$y")
+                }
+                DragEvent.ACTION_DROP -> Log.i("aaa", "释放拖拽的view")
+            }
+            return@setOnDragListener true
         }
     }
 
-    suspend fun nmi() = coroutineScope {
-        async {
-            delay(3000)
+    fun main() = CoroutineScope(Dispatchers.IO).launch { // t
+        // his: CoroutineScope
+        coroutineScope {
+            delay(200L)
+            L.e("Task from runBlocking")
         }
-        L.e("nmi delay")
-        async {
-            L.e("nmi asy")
-        }
+        L.e("Coroutine scope is over") // 这一行在内嵌 launch 执行完毕后才输出
     }
 
     private suspend fun world() {
@@ -138,7 +191,7 @@ class MainActivity : AppCompatActivity() {
 
     override fun onSupportNavigateUp(): Boolean {
         val navController = findNavController(R.id.nav_host_fragment_content_main)
-        return navController.navigateUp(appBarConfiguration)
+        return navController.navigateUp()
                 || super.onSupportNavigateUp()
     }
 }

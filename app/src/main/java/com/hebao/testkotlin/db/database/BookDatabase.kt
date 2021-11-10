@@ -14,8 +14,7 @@ import com.hebao.testkotlin.db.entity.Book
  */
 @Database(version = 1, exportSchema = false, entities = [Book::class])
 abstract class BookDatabase : RoomDatabase() {
-    val dao: BookDao by lazy { createDao() }
-    abstract fun createDao(): BookDao
+    abstract val dao: BookDao
 
     companion object {
         @Volatile
@@ -37,11 +36,6 @@ abstract class BookDatabase : RoomDatabase() {
                 }
             }
             return instance?.dao
-        }
-
-        fun closeDatabase() {
-            instance?.close()
-            instance = null
         }
 
         private object CreatedCallBack : RoomDatabase.Callback() {

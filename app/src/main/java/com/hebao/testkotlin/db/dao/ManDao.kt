@@ -19,13 +19,13 @@ interface ManDao:BaseDao<Man> {
     @Query("SELECT * FROM Man WHERE age BETWEEN :minAge AND :maxAge")
     suspend fun loadAllMansBetweenAges(minAge: Int, maxAge: Int): Array<Man>
 
-    // 查询子集
-    @Query("SELECT name,isMale,description FROM Man")
-    suspend fun loadPerson(): Array<Person>
-
     // 传递参数的集合
     @Query("SELECT * FROM Man WHERE age IN (:ages)")
     suspend fun loadUsersFromRegions(ages: List<Int>): List<Man>
+
+    // 查询子集
+    @Query("SELECT name,isMale,description FROM Man")
+    suspend fun loadPerson(): Array<Person>
 
     @Query("DELETE FROM Man")
     suspend fun deleteAll()

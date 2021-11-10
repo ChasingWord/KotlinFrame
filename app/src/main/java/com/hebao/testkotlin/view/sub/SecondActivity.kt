@@ -38,7 +38,7 @@ class SecondActivity : BaseActivity<SecondViewModel, ActivitySecondBinding>() {
                     R.color.teal_700
                 ).build()
         )
-        val secondAdapter = SecondAdapter(context, true)
+        val secondAdapter = SecondAdapter(context)
         dataBinding.rcv.adapter = secondAdapter
 
         baseViewModel.data.observe(this, {

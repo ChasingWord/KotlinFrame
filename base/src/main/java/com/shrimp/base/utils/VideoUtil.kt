@@ -25,15 +25,13 @@ object VideoUtil {
      * 则请求第一帧回调之后就不用设置到ImageView上了
      */
     fun getImageForVideo(
-        context: Context, videoPath: String, listener: OnLoadVideoImageListener?,
+        context: Context, videoPath: String, listener: OnLoadVideoImageListener,
         coroutineScope: CoroutineScope
-    ) = runBlocking {
+    ) {
         val f = getOutputMediaFile(context, videoPath)
         if (f.exists()) {
-            if (listener != null) {
-                if (context is Activity && context.isFinishing) return@runBlocking
-                listener.onLoadImage(context, f)
-            }
+            if (context is Activity && context.isFinishing) return
+            listener.onLoadImage(context, f)
         } else {
             val lifeCycleListener: AbstractLifeCycleListener =
                 object : AbstractLifeCycleListener() {
@@ -84,22 +82,23 @@ object VideoUtil {
                 }
 
                 if (context is Activity && context.isFinishing) return@launch
-                listener?.onLoadImage(context, file)
+                withContext(Dispatchers.Main){
+                    listener.onLoadImage(context, file)
+                }
                 mTaskList.remove(context.toString() + videoPath)
                 if (context is BaseActivity<*, *>)
                     context.removeLifeCycleListener(lifeCycleListener)
             }
             mTaskList[context.toString() + videoPath] = launch
-            launch.join()
         }
     }
 
     /**
      * Create a File for saving an image or video
      */
-    private fun getOutputMediaFile(context: Context, path: String): File {
+    private fun getOutputMediaFile(context: Context, _path: String): File {
         // Create a media file name
-        var path = path
+        var path = _path
         path = path.replace("\\", "/")
         val fileName = path.substring(path.lastIndexOf('/') + 1, path.lastIndexOf('.'))
         return File(
