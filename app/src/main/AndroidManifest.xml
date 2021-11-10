@@ -41,6 +41,7 @@
             </intent-filter>
         </activity>
         <activity android:name=".view.sub.SecondActivity" />
+        <activity android:name=".view.datastore.TestDatastoreActivity" />
     </application>
 
 </manifest>

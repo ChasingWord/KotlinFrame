@@ -8,10 +8,10 @@ import androidx.fragment.app.Fragment
 import androidx.navigation.fragment.findNavController
 import com.hebao.testkotlin.R
 import com.hebao.testkotlin.databinding.FragmentFirstBinding
+import com.hebao.testkotlin.view.datastore.TestDatastoreActivity
 import com.hebao.testkotlin.view.sub.SecondActivity
 import com.scwang.smart.refresh.layout.api.RefreshLayout
 import com.scwang.smart.refresh.layout.listener.OnRefreshListener
-import com.shrimp.base.utils.ObjectCacheUtil
 import kotlinx.coroutines.*
 
 /**
@@ -20,7 +20,6 @@ import kotlinx.coroutines.*
 class FirstFragment : Fragment(), OnRefreshListener {
 
     private var _binding: FragmentFirstBinding? = null
-    private lateinit var objectCacheUtil: ObjectCacheUtil
 
     // This property is only valid between onCreateView and
     // onDestroyView.
@@ -39,20 +38,17 @@ class FirstFragment : Fragment(), OnRefreshListener {
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
         binding.buttonFirst.setOnClickListener {
-            CoroutineScope(Dispatchers.IO).launch {
-                objectCacheUtil.save("key", "say hello")
-                objectCacheUtil.save("key_int", 1)
-            }
             findNavController().navigate(R.id.action_FirstFragment_to_SecondFragment)
         }
         binding.textviewFirst.setOnClickListener {
             SecondActivity.start(requireContext())
         }
+        binding.textviewSecond.setOnClickListener {
+            TestDatastoreActivity.start(requireContext())
+        }
 
         binding.refreshLayout.setOnRefreshListener(this)
         binding.refreshLayout.setEnableLoadMoreWhenContentNotFull(true)
-
-        objectCacheUtil = ObjectCacheUtil(requireContext())
     }
 
     override fun onDestroyView() {

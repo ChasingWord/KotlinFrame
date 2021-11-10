@@ -1,44 +1,28 @@
 package com.hebao.testkotlin.view.main
 
-import android.animation.Animator
+import android.animation.ObjectAnimator
 import android.content.ClipData
 import android.content.ClipDescription
-import android.graphics.Color
+import android.graphics.Path
 import android.os.Bundle
 import android.util.Log
-import android.widget.Toast
+import android.view.*
 import androidx.appcompat.app.AppCompatActivity
 import androidx.navigation.findNavController
 import androidx.navigation.ui.AppBarConfiguration
 import androidx.navigation.ui.setupActionBarWithNavController
 import com.hebao.testkotlin.R
 import com.hebao.testkotlin.databinding.ActivityMainBinding
+import com.shrimp.base.utils.ActivityUtil
 import com.shrimp.base.utils.L
-import com.shrimp.base.utils.ObjectCacheUtil
 import kotlinx.coroutines.*
-
-import android.widget.FrameLayout
-
-import android.view.animation.Animation
-import android.animation.ObjectAnimator
-import android.graphics.Path
-import android.text.TextUtils
-import android.view.*
 
 
 class MainActivity : AppCompatActivity() {
 
     private lateinit var appBarConfiguration: AppBarConfiguration
     private lateinit var binding: ActivityMainBinding
-    private lateinit var _objectCacheUtil: ObjectCacheUtil
     private var name by FormatDelegate()
-
-    private val objectCacheUtil: ObjectCacheUtil
-        get() {
-            if (!::_objectCacheUtil.isInitialized)
-                _objectCacheUtil = ObjectCacheUtil(this)
-            return _objectCacheUtil
-        }
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -52,10 +36,10 @@ class MainActivity : AppCompatActivity() {
         appBarConfiguration = AppBarConfiguration(navController.graph)
         setupActionBarWithNavController(navController, appBarConfiguration)
 
-        var job: Job? = null
         binding.fab.setOnClickListener {
-//             ActivityUtil.takePhoto(this)
+            ActivityUtil.takePhoto(this)
 
+//            var job: Job? = null
 //            job = CoroutineScope(Dispatchers.IO).launch {
 //                // 在后台启动一个新的协程并继续
 //                try {
@@ -70,13 +54,7 @@ class MainActivity : AppCompatActivity() {
 //                }
 //            }
 //            L.e("Hello,")
-//
-            CoroutineScope(Dispatchers.IO).launch {
-                objectCacheUtil.remove("key", String::class)
-                objectCacheUtil.read<Int>("key_int") {
-                    Toast.makeText(this@MainActivity, it.toString(), Toast.LENGTH_SHORT).show()
-                }
-            }
+//            job.cancel()
         }
         binding.fabTop.setOnClickListener {
 //            main()
@@ -85,25 +63,16 @@ class MainActivity : AppCompatActivity() {
             name = "abc"
             L.e(name)
 
-            CoroutineScope(Dispatchers.IO).launch {
-                objectCacheUtil.save("key_int", 2)
-            }
-
-//            CoroutineScope(Dispatchers.IO).launch {
-////                val man = Man(1, 1, true)
-////                ManDatabase.getDao(applicationContext)?.insert(man)
-//
-//                job?.cancel()
-//            }
-
-            CoroutineScope(Dispatchers.IO).launch {
-                objectCacheUtil.read<String>("key") {
-                    if (!TextUtils.isEmpty(it))
-                        Toast.makeText(this@MainActivity, it, Toast.LENGTH_SHORT).show()
-                }
-            }
+            //按路线进行位移动画
+            val path = Path()
+            path.arcTo(0f, 0f, 1000f, 1000f, 270f, -180f, true)
+            val animator: ObjectAnimator =
+                ObjectAnimator.ofFloat(binding.fabTop, View.X, View.Y, path)
+            animator.duration = 2000
+            animator.start()
         }
 
+        // 拖拽相关逻辑
         binding.fab.tag = "fabTop"
         binding.fab.setOnLongClickListener {
             val item = ClipData.Item(it.tag as CharSequence);
@@ -130,20 +99,12 @@ class MainActivity : AppCompatActivity() {
             );
             return@setOnLongClickListener true
         }
-
-        val path = Path()
-        path.arcTo(0f, 0f, 1000f, 1000f, 270f, -180f, true)
-        val animator: ObjectAnimator = ObjectAnimator.ofFloat(binding.fabTop, View.X, View.Y, path)
-        animator.duration = 2000
-        animator.start()
-
         binding.root.setOnDragListener { v, event ->
             binding.fabTop.x = event.x
             binding.fabTop.y = event.y
 
             //获取事件
-            val action = event.action
-            when (action) {
+            when (event.action) {
                 DragEvent.ACTION_DRAG_STARTED -> Log.d("aaa", "开始拖拽")
                 DragEvent.ACTION_DRAG_ENDED -> Log.d("aaa", "结束拖拽")
                 DragEvent.ACTION_DRAG_ENTERED -> Log.d("aaa", "拖拽的view进入监听的view时")
@@ -166,11 +127,6 @@ class MainActivity : AppCompatActivity() {
             L.e("Task from runBlocking")
         }
         L.e("Coroutine scope is over") // 这一行在内嵌 launch 执行完毕后才输出
-    }
-
-    private suspend fun world() {
-        delay(3000L)
-        L.e("World!")
     }
 
     override fun onCreateOptionsMenu(menu: Menu): Boolean {
