@@ -30,12 +30,12 @@ class JsonConverterFactory private constructor(private val gson: Gson) : Convert
         return GsonRequestBodyConverter(gson, adapter)
     }
 
-    // type对应的是Flowable<T>里面的T类型
+    // type对应的是Deffer<T>里面的T类型
     override fun responseBodyConverter(
         @NonNull type: Type?,
         @NonNull annotations: Array<Annotation?>?,
         @NonNull retrofit: Retrofit?
     ): Converter<ResponseBody, *> {
-        return JsonResponseBodyConverter()
+        return JsonResponseBodyConverter(gson.getAdapter(TypeToken.get(type)))
     }
 }

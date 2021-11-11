@@ -26,9 +26,9 @@ class SecondActivity : BaseActivity<SecondViewModel, ActivitySecondBinding>() {
         needChangeStatusBar = false
     }
 
-    override fun initViewModel(): Class<SecondViewModel> = SecondViewModel::class.java
+    override fun getViewModelClass(): Class<SecondViewModel> = SecondViewModel::class.java
 
-    override fun initContentView() = ActivitySecondBinding.inflate(layoutInflater)
+    override fun inflateDataBinding() = ActivitySecondBinding.inflate(layoutInflater)
 
     override fun initView() {
         dataBinding.vm = baseViewModel
@@ -45,18 +45,6 @@ class SecondActivity : BaseActivity<SecondViewModel, ActivitySecondBinding>() {
 
         baseViewModel.data.observe(this, {
             secondAdapter.insertAll(it)
-        })
-
-        dataBinding.rcv.addOnScrollListener(object : RecyclerView.OnScrollListener() {
-            override fun onScrolled(recyclerView: RecyclerView, dx: Int, dy: Int) {
-                val layoutManager = recyclerView.layoutManager
-                if (layoutManager is LinearLayoutManager) {
-                    val findLastVisibleItemPosition = layoutManager.findLastVisibleItemPosition()
-                    if (findLastVisibleItemPosition + 1 == recyclerView.adapter?.itemCount) {
-                        baseViewModel.refresh(10)
-                    }
-                }
-            }
         })
     }
 

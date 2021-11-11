@@ -36,7 +36,7 @@ dependencies {
 
     //retrofit + okHttp3
     implementation depend["retrofit2"]
-    implementation depend["retrofit2Gson"]
+    api depend["retrofit2Gson"]
     implementation depend["okhttp3Interceptor"]
     implementation depend["retrofit2Kotlin"]
 }

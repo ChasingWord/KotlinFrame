@@ -32,9 +32,9 @@ class TestDatastoreActivity : BaseActivity<TestDatastoreViewModel, ActivityTestD
         }
     }
 
-    override fun initViewModel(): Class<TestDatastoreViewModel> = TestDatastoreViewModel::class.java
+    override fun getViewModelClass(): Class<TestDatastoreViewModel> = TestDatastoreViewModel::class.java
 
-    override fun initContentView(): ActivityTestDatastoreBinding = ActivityTestDatastoreBinding.inflate(layoutInflater)
+    override fun inflateDataBinding(): ActivityTestDatastoreBinding = ActivityTestDatastoreBinding.inflate(layoutInflater)
 
     override fun initView() {
         dataBinding.first.setOnClickListener {
@@ -54,7 +54,7 @@ class TestDatastoreActivity : BaseActivity<TestDatastoreViewModel, ActivityTestD
         dataBinding.firstRead.setOnClickListener {
             CoroutineScope(Dispatchers.IO).launch {
                 objectCacheUtil.read<String>("key") {
-                    Toast.makeText(this@TestDatastoreActivity, it.toString(), Toast.LENGTH_SHORT)
+                    Toast.makeText(this@TestDatastoreActivity, it, Toast.LENGTH_SHORT)
                         .show()
                 }
             }

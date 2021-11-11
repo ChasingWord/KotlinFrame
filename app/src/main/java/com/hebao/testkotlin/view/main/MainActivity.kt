@@ -4,6 +4,7 @@ import android.animation.ObjectAnimator
 import android.content.ClipData
 import android.content.ClipDescription
 import android.graphics.Path
+import android.os.Build
 import android.os.Bundle
 import android.util.Log
 import android.view.*
@@ -85,19 +86,27 @@ class MainActivity : AppCompatActivity() {
                 it.tag as CharSequence,
                 arrayOf(ClipDescription.MIMETYPE_TEXT_PLAIN),
                 item
-            );
+            )
 
             // Instantiates the drag shadow builder.
-            val myShadow = MyDragShadowBuilder(it);
+            val myShadow = MyDragShadowBuilder(it)
 
             // Starts the drag
-
-            it.startDrag(
-                dragData,  // the data to be dragged
-                myShadow,  // the drag shadow builder
-                null,      // no need to use local data
-                0          // flags (not currently used, set to 0)
-            );
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {
+                it.startDragAndDrop(
+                    dragData,  // the data to be dragged
+                    myShadow,  // the drag shadow builder
+                    null,      // no need to use local data
+                    0          // flags (not currently used, set to 0)
+                )
+            } else {
+                it.startDrag(
+                    dragData,  // the data to be dragged
+                    myShadow,  // the drag shadow builder
+                    null,      // no need to use local data
+                    0          // flags (not currently used, set to 0)
+                )
+            }
             return@setOnLongClickListener true
         }
         binding.root.setOnDragListener { v, event ->

@@ -84,11 +84,11 @@ abstract class BaseActivity<T : BaseViewModel, D : ViewDataBinding> : AppCompatA
             }
         }
 
-        dataBinding = initContentView()
+        dataBinding = inflateDataBinding()
         dataBinding.lifecycleOwner = this
         setContentView(dataBinding.root)
 
-        baseViewModel = ViewModelProvider(this).get(initViewModel())
+        baseViewModel = ViewModelProvider(this).get(getViewModelClass())
         baseViewModel.dialogShow.observe(this) { isShow ->
             if (isShow)
                 showLoading()
@@ -108,12 +108,12 @@ abstract class BaseActivity<T : BaseViewModel, D : ViewDataBinding> : AppCompatA
     open fun changeConfig() {
     }
 
-    abstract fun initViewModel(): Class<T>
+    abstract fun getViewModelClass(): Class<T>
 
     /**
      * bindingView
      */
-    abstract fun initContentView(): D
+    abstract fun inflateDataBinding(): D
 
     /**
      * 初始化视图
