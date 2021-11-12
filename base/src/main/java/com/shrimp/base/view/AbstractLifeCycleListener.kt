@@ -5,7 +5,7 @@ import android.app.Activity
 /**
  * Created by chasing on 2021/11/10.
  */
-abstract class AbstractLifeCycleListener : LifeCycleListener {
+abstract class AbstractLifeCycleListener : ILifeCycleListener {
     /**
      * 如果是在Fragment进行添加，则设置为false
      * 用于在移除Fragment的时候同时移除其监听

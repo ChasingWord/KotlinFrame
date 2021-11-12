@@ -81,4 +81,8 @@ class TestDatastoreActivity : BaseActivity<TestDatastoreViewModel, ActivityTestD
             }
         }
     }
+
+    override fun initDataObserve() {
+
+    }
 }

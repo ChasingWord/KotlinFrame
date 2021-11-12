@@ -30,12 +30,11 @@ abstract class BaseActivity<T : BaseViewModel, D : ViewDataBinding> : AppCompatA
     protected var oneClickUtil = OneClickUtil()
     protected var isPause = false
 
-    // 由ViewModel.isShow进行监听控制显示与隐藏
     private lateinit var dialog: ProgressDialog
     private var showLoadingTime: Long = 0
     private val handler = Handler(Looper.getMainLooper())
 
-    private val lifeCycleListeners: ArrayList<LifeCycleListener> = ArrayList()
+    private val lifeCycleListeners: ArrayList<ILifeCycleListener> = ArrayList()
     protected lateinit var baseViewModel: T
     protected lateinit var dataBinding: D
 
@@ -100,6 +99,7 @@ abstract class BaseActivity<T : BaseViewModel, D : ViewDataBinding> : AppCompatA
         baseViewModel.loadingData()
 
         initView()
+        initDataObserve()
     }
 
     /**
@@ -119,6 +119,11 @@ abstract class BaseActivity<T : BaseViewModel, D : ViewDataBinding> : AppCompatA
      * 初始化视图
      */
     abstract fun initView()
+
+    /**
+     * 初始化ViewModel的数据监听
+     */
+    abstract fun initDataObserve()
 
     override fun onStart() {
         super.onStart()
@@ -155,6 +160,7 @@ abstract class BaseActivity<T : BaseViewModel, D : ViewDataBinding> : AppCompatA
     }
 
     override fun onDestroy() {
+        handler.removeCallbacksAndMessages(null)
         for (lifeCycleListener in lifeCycleListeners) {
             lifeCycleListener.onDestroy(this)
         }
@@ -165,11 +171,11 @@ abstract class BaseActivity<T : BaseViewModel, D : ViewDataBinding> : AppCompatA
         super.onDestroy()
     }
 
-    fun addLifeCycleListener(lifeCycleListener: LifeCycleListener) {
+    fun addLifeCycleListener(lifeCycleListener: ILifeCycleListener) {
         lifeCycleListeners.add(lifeCycleListener)
     }
 
-    fun removeLifeCycleListener(lifeCycleListener: LifeCycleListener) {
+    fun removeLifeCycleListener(lifeCycleListener: ILifeCycleListener) {
         lifeCycleListeners.remove(lifeCycleListener)
     }
 
