@@ -39,7 +39,7 @@ abstract class BaseActivity<T : BaseViewModel, D : ViewDataBinding> : AppCompatA
     protected lateinit var dataBinding: D
 
     protected var needChangeStatusBar = true
-    protected var needStatusBarDarkMode = true
+    protected var isStatusBarDarkMode = true
     protected var statusBarColor = R.color.ffffff
 
     companion object {
@@ -70,9 +70,9 @@ abstract class BaseActivity<T : BaseViewModel, D : ViewDataBinding> : AppCompatA
             when {
                 statusBarColor == R.color.transparent -> StatusBarUtil.setTransparentStatusBar(
                     this,
-                    needStatusBarDarkMode
+                    isStatusBarDarkMode
                 )
-                needStatusBarDarkMode -> StatusBarUtil.setColorDiff(
+                isStatusBarDarkMode -> StatusBarUtil.setColorDiff(
                     this,
                     ContextCompat.getColor(this, statusBarColor)
                 )
