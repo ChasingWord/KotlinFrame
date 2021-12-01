@@ -14,18 +14,18 @@ import kotlin.coroutines.cancellation.CancellationException
 object RequestManager {
 
     // region engine对象创建
-    private lateinit var _exampleEngine: ExampleEngine
+    private lateinit var exampleEngineImp: ExampleEngine
     private val exampleLock = Any() //每个engine创建需要单独的锁，避免影响其它engine获取
     private val exampleEngine: ExampleEngine
         get() {
-            if (!::_exampleEngine.isInitialized) {
+            if (!::exampleEngineImp.isInitialized) {
                 synchronized(exampleLock) {
-                    if (!::_exampleEngine.isInitialized) {
-                        _exampleEngine = ExampleEngine()
+                    if (!::exampleEngineImp.isInitialized) {
+                        exampleEngineImp = ExampleEngine()
                     }
                 }
             }
-            return _exampleEngine
+            return exampleEngineImp
         }
     // endregion
 

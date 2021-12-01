@@ -1,12 +1,9 @@
 package com.hebao.testkotlin.view.sub
 
 import android.app.Application
-import android.os.Handler
-import android.os.Looper
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.viewModelScope
 import com.shrimp.base.utils.ActivityUtil
-import com.shrimp.base.utils.L
 import com.shrimp.base.view.BaseViewModel
 import com.shrimp.network.callback.AbstractCallBack
 import com.shrimp.network.entity.base.ResponseResult
@@ -37,7 +34,7 @@ class SecondViewModel(application: Application) : BaseViewModel(application) {
         }, viewModelScope)
     }
 
-    private fun get(){
+    private fun get() {
         repository.getData(object : AbstractCallBack<PresetWordDataInfo>() {
             override suspend fun onStart() {
                 dialogShow.value = true

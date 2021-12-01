@@ -36,12 +36,8 @@ import kotlin.system.exitProcess
  * Created by chasing on 2021/10/22.
  */
 object ActivityUtil {
-    var startActivityCount = 0
     val oneClickUtil = OneClickUtil()
     private var activityStack: Stack<Activity> = Stack()
-
-    //首页是否已经启动
-    var isMainActivityHadStart = false
 
     fun getNotificationManager(context: Context): NotificationManager {
         return context.getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
@@ -328,12 +324,11 @@ object ActivityUtil {
     fun registerNotification(context: Context, id: String?, name: CharSequence?) {
         val notificationManager =
             context.getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
-                ?: return
         val channel1 = NotificationChannel(id, name, NotificationManager.IMPORTANCE_HIGH)
         channel1.enableLights(true) //设置通知出现时的闪灯（如果 android 设备支持的话）
         channel1.lightColor = Color.GREEN //闪灯颜色
         channel1.enableVibration(true) // 设置通知出现时的震动（如果 android 设备支持的话）
-        //            channel1.setShowBadge(true); //是否在久按桌面图标时显示此渠道的通知，默认为true
+        // channel1.setShowBadge(true); //是否在久按桌面图标时显示此渠道的通知，默认为true
         notificationManager.createNotificationChannel(channel1)
     }
 
@@ -358,19 +353,17 @@ object ActivityUtil {
         intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TOP) //会清除跳转目标activity及之上的所有activity
         val clickIntent = Intent(context, NotificationClickReceiver::class.java)
         clickIntent.putExtra("intent", intent)
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) sendNotificationAbove26(
-            context,
-            id,
-            title,
-            content,
-            clickIntent,
-            notificationId
-        ) else sendNotificationBelow26(context, id, title, content, clickIntent, notificationId)
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O)
+            sendNotificationAbove26(
+                context, id, title, content, clickIntent, notificationId
+            )
+        else
+            sendNotificationBelow26(context, id, title, content, clickIntent, notificationId)
     }
 
     private var PRE_SHOW_NOTIFICATION_TIME: Long = 0
 
-    @SuppressLint("LaunchActivityFromNotification")
+    @SuppressLint("LaunchActivityFromNotification", "UnspecifiedImmutableFlag")
     private fun sendNotificationBelow26(
         context: Context,
         id: String,
@@ -407,6 +400,7 @@ object ActivityUtil {
         )
     }
 
+    @SuppressLint("UnspecifiedImmutableFlag")
     @TargetApi(Build.VERSION_CODES.O)
     private fun sendNotificationAbove26(
         context: Context,
