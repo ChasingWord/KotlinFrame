@@ -6,9 +6,8 @@ import androidx.recyclerview.widget.LinearLayoutManager
 import com.hebao.testkotlin.R
 import com.hebao.testkotlin.databinding.ActivitySecondBinding
 import com.shrimp.base.decoration.HorizontalDividerItemDecoration
+import com.shrimp.base.utils.image_load.ImageLoadUtil
 import com.shrimp.base.view.BaseActivity
-import com.shrimp.network.entity.res.Tags
-import java.util.*
 
 /**
  * Created by chasing on 2021/10/25.
@@ -17,7 +16,7 @@ import java.util.*
  */
 class SecondActivity : BaseActivity<SecondViewModel, ActivitySecondBinding>() {
 
-    private val secondAdapter = SecondAdapter(context)
+    private lateinit var secondAdapter: SecondAdapter
 
     companion object {
         fun start(context: Context) {
@@ -35,6 +34,11 @@ class SecondActivity : BaseActivity<SecondViewModel, ActivitySecondBinding>() {
 
     override fun initView() {
         dataBinding.vm = baseViewModel
+        ImageLoadUtil.loadRound(
+            dataBinding.imageView,
+            "https://ts1.cn.mm.bing.net/th?id=OIP-C.ED2CV_IKkq4cCWrD3kxgQQHaJ7&w=123&h=170&c=8&rs=1&qlt=90&o=6&pid=3.1&rm=2",
+            20f
+        )
 
         dataBinding.rcv.layoutManager = LinearLayoutManager(context)
         dataBinding.rcv.addItemDecoration(
@@ -43,6 +47,7 @@ class SecondActivity : BaseActivity<SecondViewModel, ActivitySecondBinding>() {
                     R.color.teal_700
                 ).build()
         )
+        secondAdapter = SecondAdapter(context)
         dataBinding.rcv.adapter = secondAdapter
     }
 

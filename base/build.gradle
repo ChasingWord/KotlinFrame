@@ -48,6 +48,10 @@ dependencies {
     implementation depend["exifinterface"]
     api depend["recyclerview"]
     api depend["refresh"]
+    api depend["coil"]
+    api depend["coilGif"]
+    api depend["coilVideo"]
+
     api depend["lifecycle"]
     api depend["lifecycleVM"]
     api depend["lifecycleLD"]
