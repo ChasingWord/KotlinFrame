@@ -41,9 +41,6 @@ object ImageLoadUtil {
     }
 
     fun loadRound(imageView: ImageView, url: String, radius: Float) {
-        val request = ImageRequest.Builder(imageView.context)
-            .data("https://www.example.com/image.jpg")
-            .build()
         imageView.load(url) {
             transformations(RoundedCornersTransformation(radius).also {
                 if (imageView.scaleType == ImageView.ScaleType.FIT_CENTER)
@@ -57,7 +54,6 @@ object ImageLoadUtil {
                 }
 
                 override fun onError(request: ImageRequest, throwable: Throwable) {
-
                 }
 
                 override fun onSuccess(request: ImageRequest, metadata: ImageResult.Metadata) {
