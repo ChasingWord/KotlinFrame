@@ -36,7 +36,7 @@ class SecondActivity : BaseActivity<SecondViewModel, ActivitySecondBinding>() {
         dataBinding.vm = baseViewModel
         ImageLoadUtil.loadRound(
             dataBinding.imageView,
-            "https://ts1.cn.mm.bing.net/th?id=OIP-C.ED2CV_IKkq4cCWrD3kxgQQHaJ7&w=123&h=170&c=8&rs=1&qlt=90&o=6&pid=3.1&rm=2",
+            "https://video.qiantucdn.com/58pic/35/05/76/13M58PIC8ZBtfVeCQQ58PICVp.mp4_10s.mp4?e=1638860299&token=OyzEe_0O8H433pm7zVEjtnSy5dVdfpsIawO2nx3f:WGmGvkra_yHhsX7wnm8hjZ_2mB0=",
             20f
         )
 
