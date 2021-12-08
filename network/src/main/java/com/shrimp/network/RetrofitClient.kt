@@ -3,6 +3,7 @@ package com.shrimp.network
 import com.jakewharton.retrofit2.adapter.kotlin.coroutines.CoroutineCallAdapterFactory
 import com.shrimp.network.utils.EncryptionInterceptor
 import com.shrimp.network.utils.JsonConverterFactory
+import com.shrimp.network.utils.LoggerInterceptor
 import okhttp3.OkHttpClient
 import retrofit2.Retrofit
 import java.util.concurrent.TimeUnit
@@ -32,11 +33,13 @@ object RetrofitClient {
     }
 
     private fun newHttpClient(): OkHttpClient {
-        return OkHttpClient().newBuilder()
+        val builder = OkHttpClient().newBuilder()
             .readTimeout(60, TimeUnit.SECONDS)
             .writeTimeout(60, TimeUnit.SECONDS)
             .connectTimeout(60, TimeUnit.SECONDS)
             .addInterceptor(EncryptionInterceptor())
-            .build()
+        if (BuildConfig.DEBUG)
+            builder.addInterceptor(LoggerInterceptor())
+        return builder.build()
     }
 }
