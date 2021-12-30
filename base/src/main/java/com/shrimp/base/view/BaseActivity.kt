@@ -25,7 +25,7 @@ import com.shrimp.base.widgets.dialog.ProgressDialog
 /**
  * Created by chasing on 2021/10/19.
  */
-abstract class BaseActivity<T : BaseViewModel, D : ViewDataBinding> : AppCompatActivity() {
+abstract class BaseActivity<VM : BaseViewModel, B : ViewDataBinding> : AppCompatActivity() {
     protected lateinit var context: Activity
     protected var oneClickUtil = OneClickUtil()
     protected var isPause = false
@@ -34,9 +34,8 @@ abstract class BaseActivity<T : BaseViewModel, D : ViewDataBinding> : AppCompatA
     private var showLoadingTime: Long = 0
     private val handler = Handler(Looper.getMainLooper())
 
-    private val lifeCycleListeners: ArrayList<ILifeCycleListener> = ArrayList()
-    protected lateinit var baseViewModel: T
-    protected lateinit var dataBinding: D
+    protected lateinit var baseViewModel: VM
+    protected lateinit var dataBinding: B
 
     protected var needChangeStatusBar = true
     protected var isStatusBarDarkMode = true
@@ -94,10 +93,10 @@ abstract class BaseActivity<T : BaseViewModel, D : ViewDataBinding> : AppCompatA
             else
                 hideLoading()
         }
-        baseViewModel.onCreate()
         baseViewModel.handleIntent(intent)
         baseViewModel.loadingData()
 
+        lifecycle.addObserver(baseViewModel)
         initView()
         initDataObserve()
     }
@@ -108,12 +107,12 @@ abstract class BaseActivity<T : BaseViewModel, D : ViewDataBinding> : AppCompatA
     open fun changeConfig() {
     }
 
-    abstract fun getViewModelClass(): Class<T>
-
     /**
      * bindingView
      */
-    abstract fun inflateDataBinding(): D
+    abstract fun inflateDataBinding(): B
+
+    abstract fun getViewModelClass(): Class<VM>
 
     /**
      * 初始化视图
@@ -125,58 +124,22 @@ abstract class BaseActivity<T : BaseViewModel, D : ViewDataBinding> : AppCompatA
      */
     abstract fun initDataObserve()
 
-    override fun onStart() {
-        super.onStart()
-        for (lifeCycleListener in lifeCycleListeners) {
-            lifeCycleListener.onStart(this)
-        }
-        baseViewModel.onStart()
-    }
-
     override fun onResume() {
         super.onResume()
         isPause = false
-        for (lifeCycleListener in lifeCycleListeners) {
-            lifeCycleListener.onResume(this)
-        }
-        baseViewModel.onResume()
     }
 
     override fun onPause() {
         super.onPause()
         isPause = true;
-        for (lifeCycleListener in lifeCycleListeners) {
-            lifeCycleListener.onPause(this)
-        }
-        baseViewModel.onPause()
-    }
-
-    override fun onStop() {
-        super.onStop()
-        for (lifeCycleListener in lifeCycleListeners) {
-            lifeCycleListener.onStop(this)
-        }
-        baseViewModel.onStop()
     }
 
     override fun onDestroy() {
         handler.removeCallbacksAndMessages(null)
-        for (lifeCycleListener in lifeCycleListeners) {
-            lifeCycleListener.onDestroy(this)
-        }
-        lifeCycleListeners.clear()
-        baseViewModel.onDestroy()
         FixMemLeakUtil.fixLeak(this)
         dialog.onDestroy()
         super.onDestroy()
-    }
-
-    fun addLifeCycleListener(lifeCycleListener: ILifeCycleListener) {
-        lifeCycleListeners.add(lifeCycleListener)
-    }
-
-    fun removeLifeCycleListener(lifeCycleListener: ILifeCycleListener) {
-        lifeCycleListeners.remove(lifeCycleListener)
+        dataBinding.unbind()
     }
 
     private fun showLoading() {
@@ -213,9 +176,9 @@ abstract class BaseActivity<T : BaseViewModel, D : ViewDataBinding> : AppCompatA
         grantResults: IntArray
     ) {
         super.onRequestPermissionsResult(requestCode, permissions, grantResults)
-        for(i in grantResults.indices){
-            if (grantResults[i] == PackageManager.PERMISSION_DENIED){
-                if (!ActivityCompat.shouldShowRequestPermissionRationale(this, permissions[i])){
+        for (i in grantResults.indices) {
+            if (grantResults[i] == PackageManager.PERMISSION_DENIED) {
+                if (!ActivityCompat.shouldShowRequestPermissionRationale(this, permissions[i])) {
                     // 被永久拒绝--需要显示请求理由
                     var toastString: String
                     when (permissions[i]) {

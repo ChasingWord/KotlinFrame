@@ -46,6 +46,7 @@ dependencies {
     androidTestImplementation depend["testEspresso"]
 
     implementation depend["exifinterface"]
+    api depend["activity"]
     api depend["recyclerview"]
     api depend["refresh"]
     api depend["coil"]

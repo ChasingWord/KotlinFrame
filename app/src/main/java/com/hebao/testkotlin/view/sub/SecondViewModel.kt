@@ -1,7 +1,9 @@
 package com.hebao.testkotlin.view.sub
 
 import android.app.Application
+import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.MutableLiveData
+import androidx.lifecycle.OnLifecycleEvent
 import androidx.lifecycle.viewModelScope
 import com.shrimp.base.utils.ActivityUtil
 import com.shrimp.base.view.BaseViewModel

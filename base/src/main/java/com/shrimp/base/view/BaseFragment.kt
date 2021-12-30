@@ -18,7 +18,7 @@ import com.shrimp.base.widgets.dialog.ProgressDialog
 /**
  * Created by chasing on 2021/11/12.
  */
-abstract class BaseFragment<T : BaseFragmentViewModel, D : ViewDataBinding> : Fragment() {
+abstract class BaseFragment<VM : BaseFragmentViewModel, B : ViewDataBinding> : Fragment() {
 
     protected var oneClickUtil = OneClickUtil()
 
@@ -29,15 +29,13 @@ abstract class BaseFragment<T : BaseFragmentViewModel, D : ViewDataBinding> : Fr
 
     private var isPause = false
     private var hidden = false
+
     // 判断是否销毁了dataBinding，避免销毁之后再进行使用
     protected var isDestroyView = false
 
     private val lifeCycleListeners: ArrayList<IFragmentLifeCycleListener> = ArrayList()
-    protected lateinit var baseViewModel: T
-    private var _dataBinding: D? = null
-
-    // This property is only valid between onCreateView and onDestroyView.
-    protected val dataBinding: D = _dataBinding!!
+    protected lateinit var baseViewModel: VM
+    protected lateinit var dataBinding: B
 
     override fun onAttach(context: Context) {
         super.onAttach(context)
@@ -54,7 +52,9 @@ abstract class BaseFragment<T : BaseFragmentViewModel, D : ViewDataBinding> : Fr
         container: ViewGroup?,
         savedInstanceState: Bundle?
     ): View? {
-        _dataBinding = inflateDataBinding(inflater, container)
+        dataBinding = inflateDataBinding(inflater, container)
+        dataBinding.lifecycleOwner = this
+
         baseViewModel.onCreateView()
         dialog = ProgressDialog()
         dialog.isCancelable = true
@@ -71,9 +71,12 @@ abstract class BaseFragment<T : BaseFragmentViewModel, D : ViewDataBinding> : Fr
         return dataBinding.root
     }
 
-    abstract fun inflateDataBinding(inflater: LayoutInflater, container: ViewGroup?): D
+    /**
+     * bindingView
+     */
+    abstract fun inflateDataBinding(inflater: LayoutInflater, container: ViewGroup?): B
 
-    abstract fun getViewModelClass(): Class<T>
+    abstract fun getViewModelClass(): Class<VM>
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
@@ -82,8 +85,14 @@ abstract class BaseFragment<T : BaseFragmentViewModel, D : ViewDataBinding> : Fr
         baseViewModel.loadingData()
     }
 
+    /**
+     * 初始化视图
+     */
     abstract fun initView()
 
+    /**
+     * 初始化ViewModel的数据监听
+     */
     abstract fun initDataObserve()
 
     override fun onActivityCreated(savedInstanceState: Bundle?) {
@@ -143,7 +152,7 @@ abstract class BaseFragment<T : BaseFragmentViewModel, D : ViewDataBinding> : Fr
         }
         baseViewModel.onDestroyView()
         super.onDestroyView()
-        _dataBinding = null
+        dataBinding.unbind()
     }
 
     override fun onDestroy() {
