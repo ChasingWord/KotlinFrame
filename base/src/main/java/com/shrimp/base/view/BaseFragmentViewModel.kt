@@ -14,7 +14,6 @@ abstract class BaseFragmentViewModel(application: Application) : AndroidViewMode
     IFragmentLifeCycle {
     val dialogShow: MutableLiveData<Boolean> = MutableLiveData()
 
-    override fun onAttach() {}
     override fun onCreate() {}
     override fun onCreateView() {}
     override fun onActivityCreated() {}

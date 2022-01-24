@@ -4,7 +4,6 @@ package com.shrimp.base.view
  * Created by chasing on 2021/11/12.
  */
 interface IFragmentLifeCycle {
-    fun onAttach() {}
     fun onCreate()
     fun onCreateView()
     fun onActivityCreated()

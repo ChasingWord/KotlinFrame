@@ -1,6 +1,5 @@
 package com.shrimp.base.view
 
-import android.content.Context
 import android.os.Bundle
 import android.os.Handler
 import android.os.Looper
@@ -37,13 +36,9 @@ abstract class BaseFragment<VM : BaseFragmentViewModel, B : ViewDataBinding> : F
     protected lateinit var baseViewModel: VM
     protected lateinit var dataBinding: B
 
-    override fun onAttach(context: Context) {
-        super.onAttach(context)
-        baseViewModel.onAttach()
-    }
-
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+        baseViewModel = ViewModelProvider(this).get(getViewModelClass())
         baseViewModel.onCreate()
     }
 
@@ -59,7 +54,6 @@ abstract class BaseFragment<VM : BaseFragmentViewModel, B : ViewDataBinding> : F
         dialog = ProgressDialog()
         dialog.isCancelable = true
 
-        baseViewModel = ViewModelProvider(this).get(getViewModelClass())
         baseViewModel.dialogShow.observe(viewLifecycleOwner) { isShow ->
             if (isShow)
                 showLoading()

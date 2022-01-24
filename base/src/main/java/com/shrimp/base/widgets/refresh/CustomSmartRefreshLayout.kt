@@ -3,7 +3,6 @@ package com.shrimp.base.widgets.refresh
 import android.content.Context
 import android.util.AttributeSet
 import com.scwang.smart.refresh.layout.SmartRefreshLayout
-import com.scwang.smart.refresh.layout.api.RefreshLayout
 import com.scwang.smart.refresh.layout.constant.RefreshState
 
 /**

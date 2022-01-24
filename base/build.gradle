@@ -48,7 +48,7 @@ dependencies {
     implementation depend["exifinterface"]
     api depend["activity"]
     api depend["recyclerview"]
-    api depend["refresh"]
+    api depend["smartRefreshLayout"]
     api depend["coil"]
     api depend["coilGif"]
     api depend["coilVideo"]
