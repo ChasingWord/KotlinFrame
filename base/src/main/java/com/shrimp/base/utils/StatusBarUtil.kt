@@ -14,6 +14,7 @@ import androidx.core.content.ContextCompat
 import com.shrimp.base.R
 
 /**
+ * 注意：要在setContentView之后调用
  * Android5.0以下需要特殊处理才能适配修改状态栏颜色
  * Android5.0开始可以修改状态栏颜色
  * Android6.0开始可以修改状态栏字体颜色

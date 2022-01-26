@@ -9,6 +9,7 @@ import android.os.Bundle
 import android.util.Log
 import android.view.*
 import androidx.appcompat.app.AppCompatActivity
+import androidx.core.content.ContextCompat
 import androidx.navigation.findNavController
 import androidx.navigation.ui.AppBarConfiguration
 import androidx.navigation.ui.setupActionBarWithNavController
@@ -16,6 +17,7 @@ import com.hebao.testkotlin.R
 import com.hebao.testkotlin.databinding.ActivityMainBinding
 import com.shrimp.base.utils.ActivityUtil
 import com.shrimp.base.utils.L
+import com.shrimp.base.utils.StatusBarUtil
 import kotlinx.coroutines.*
 
 
@@ -27,9 +29,10 @@ class MainActivity : AppCompatActivity() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-
         binding = ActivityMainBinding.inflate(layoutInflater)
         setContentView(binding.root)
+
+        StatusBarUtil.setColorDiff(this, ContextCompat.getColor(this, R.color.design_default_color_error))
 
         setSupportActionBar(binding.toolbar)
 

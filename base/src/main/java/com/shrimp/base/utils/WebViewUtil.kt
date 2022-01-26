@@ -77,7 +77,7 @@ fun WebView.loadLocalProtocol(rawResId: Int) {
     }
 }
 
-fun WebView.destroy() {
+fun WebView.removeAndDestroy() {
     if (parent is ViewGroup) (parent as ViewGroup).removeView(this)
     stopLoading()
     // 退出时调用此方法，移除绑定的服务，否则某些特定系统会报错

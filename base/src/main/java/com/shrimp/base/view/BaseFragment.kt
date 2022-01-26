@@ -16,6 +16,7 @@ import com.shrimp.base.widgets.dialog.ProgressDialog
 
 /**
  * Created by chasing on 2021/11/12.
+ * 因为系统封装的LifecycleObserve只有
  */
 abstract class BaseFragment<VM : BaseFragmentViewModel, B : ViewDataBinding> : Fragment() {
 
@@ -32,14 +33,13 @@ abstract class BaseFragment<VM : BaseFragmentViewModel, B : ViewDataBinding> : F
     // 判断是否销毁了dataBinding，避免销毁之后再进行使用
     protected var isDestroyView = false
 
-    private val lifeCycleListeners: ArrayList<IFragmentLifeCycleListener> = ArrayList()
     protected lateinit var baseViewModel: VM
     protected lateinit var dataBinding: B
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         baseViewModel = ViewModelProvider(this).get(getViewModelClass())
-        baseViewModel.onCreate()
+        lifecycle.addObserver(baseViewModel)
     }
 
     override fun onCreateView(
@@ -50,7 +50,6 @@ abstract class BaseFragment<VM : BaseFragmentViewModel, B : ViewDataBinding> : F
         dataBinding = inflateDataBinding(inflater, container)
         dataBinding.lifecycleOwner = this
 
-        baseViewModel.onCreateView()
         dialog = ProgressDialog()
         dialog.isCancelable = true
 
@@ -60,7 +59,6 @@ abstract class BaseFragment<VM : BaseFragmentViewModel, B : ViewDataBinding> : F
             else
                 hideLoading()
         }
-        baseViewModel.onCreate()
         baseViewModel.handleBundle(arguments)
         return dataBinding.root
     }
@@ -89,91 +87,31 @@ abstract class BaseFragment<VM : BaseFragmentViewModel, B : ViewDataBinding> : F
      */
     abstract fun initDataObserve()
 
-    override fun onActivityCreated(savedInstanceState: Bundle?) {
-        super.onActivityCreated(savedInstanceState)
-        baseViewModel.onActivityCreated()
-    }
-
-    override fun onStart() {
-        super.onStart()
-        for (lifeCycleListener in lifeCycleListeners) {
-            lifeCycleListener.onStart(this)
-        }
-        baseViewModel.onStart()
-    }
-
     override fun onHiddenChanged(hidden: Boolean) {
         super.onHiddenChanged(hidden)
         this.hidden = hidden
-        for (lifeCycleListener in lifeCycleListeners) {
-            if (hidden)
-                lifeCycleListener.onPause(this)
-            else
-                lifeCycleListener.onResume(this)
-        }
     }
 
     override fun onResume() {
         super.onResume()
         isPause = false
-        for (lifeCycleListener in lifeCycleListeners) {
-            lifeCycleListener.onResume(this)
-        }
-        baseViewModel.onResume()
     }
 
     override fun onPause() {
         super.onPause()
         isPause = true
-        for (lifeCycleListener in lifeCycleListeners) {
-            lifeCycleListener.onPause(this)
-        }
-        baseViewModel.onPause()
-    }
-
-    override fun onStop() {
-        super.onStop()
-        for (lifeCycleListener in lifeCycleListeners) {
-            lifeCycleListener.onStop(this)
-        }
-        baseViewModel.onStop()
     }
 
     override fun onDestroyView() {
         isDestroyView = true
-        for (lifeCycleListener in lifeCycleListeners) {
-            lifeCycleListener.onDestroyView(this)
-        }
-        baseViewModel.onDestroyView()
         super.onDestroyView()
         dataBinding.unbind()
     }
 
     override fun onDestroy() {
         handler.removeCallbacksAndMessages(null)
-        for (lifeCycleListener in lifeCycleListeners) {
-            lifeCycleListener.onDestroy(this)
-        }
-        lifeCycleListeners.clear()
-        baseViewModel.onDestroy()
         dialog.onDestroy()
         super.onDestroy()
-    }
-
-    override fun onDetach() {
-        for (lifeCycleListener in lifeCycleListeners) {
-            lifeCycleListener.onDetach(this)
-        }
-        baseViewModel.onDetach()
-        super.onDetach()
-    }
-
-    fun addLifeCycleListener(lifeCycleListener: IFragmentLifeCycleListener) {
-        lifeCycleListeners.add(lifeCycleListener)
-    }
-
-    fun removeLifeCycleListener(lifeCycleListener: IFragmentLifeCycleListener) {
-        lifeCycleListeners.remove(lifeCycleListener)
     }
 
     private fun showLoading() {

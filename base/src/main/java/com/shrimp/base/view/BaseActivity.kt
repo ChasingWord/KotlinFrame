@@ -8,6 +8,7 @@ import android.content.pm.PackageManager
 import android.os.Bundle
 import android.os.Handler
 import android.os.Looper
+import android.view.Window
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.app.ActivityCompat
 import androidx.core.content.ContextCompat
@@ -25,7 +26,7 @@ import com.shrimp.base.widgets.dialog.ProgressDialog
 /**
  * Created by chasing on 2021/10/19.
  */
-abstract class BaseActivity<VM : BaseViewModel, B : ViewDataBinding> : AppCompatActivity() {
+abstract class BaseActivity<VM : BaseActivityModel, B : ViewDataBinding> : AppCompatActivity() {
     protected lateinit var context: Activity
     protected var oneClickUtil = OneClickUtil()
     protected var isPause = false
@@ -59,12 +60,15 @@ abstract class BaseActivity<VM : BaseViewModel, B : ViewDataBinding> : AppCompat
     }
 
     override fun onCreate(savedInstanceState: Bundle?) {
+        requestWindowFeature(Window.FEATURE_NO_TITLE)
         super.onCreate(savedInstanceState)
         context = this
-        dialog = ProgressDialog()
-        dialog.isCancelable = true
-        changeConfig()
 
+        dataBinding = inflateDataBinding()
+        dataBinding.lifecycleOwner = this
+        setContentView(dataBinding.root)
+
+        changeConfig()
         if (needChangeStatusBar) {
             when {
                 statusBarColor == R.color.transparent -> StatusBarUtil.setTransparentStatusBar(
@@ -82,9 +86,8 @@ abstract class BaseActivity<VM : BaseViewModel, B : ViewDataBinding> : AppCompat
             }
         }
 
-        dataBinding = inflateDataBinding()
-        dataBinding.lifecycleOwner = this
-        setContentView(dataBinding.root)
+        dialog = ProgressDialog()
+        dialog.isCancelable = true
 
         baseViewModel = ViewModelProvider(this).get(getViewModelClass())
         baseViewModel.dialogShow.observe(this) { isShow ->

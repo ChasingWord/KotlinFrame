@@ -2,11 +2,15 @@ package com.hebao.testkotlin.view.sub
 
 import android.content.Context
 import android.view.View
+import androidx.lifecycle.Lifecycle
+import androidx.lifecycle.LifecycleObserver
+import androidx.lifecycle.OnLifecycleEvent
 import androidx.recyclerview.widget.LinearLayoutManager
 import com.hebao.testkotlin.R
 import com.hebao.testkotlin.databinding.ActivitySecondBinding
 import com.shrimp.base.adapter.recycler.BaseRecyclerAdapter
 import com.shrimp.base.decoration.HorizontalDividerItemDecoration
+import com.shrimp.base.utils.StatusBarUtil
 import com.shrimp.base.utils.image_load.ImageLoadUtil
 import com.shrimp.base.view.BaseActivity
 
@@ -26,7 +30,7 @@ class SecondActivity : BaseActivity<SecondViewModel, ActivitySecondBinding>() {
     }
 
     override fun changeConfig() {
-        needChangeStatusBar = false
+        statusBarColor = R.color.transparent
     }
 
     override fun getViewModelClass(): Class<SecondViewModel> = SecondViewModel::class.java
@@ -55,6 +59,33 @@ class SecondActivity : BaseActivity<SecondViewModel, ActivitySecondBinding>() {
             override fun onItemClick(position: Int) {
                 val item = secondAdapter.getItem(position)
                 baseViewModel.title.value = item.Name
+            }
+        })
+
+        // 添加生命周期监听
+        lifecycle.addObserver(object : LifecycleObserver {
+            @OnLifecycleEvent(Lifecycle.Event.ON_CREATE)
+            fun onCreate() {
+            }
+
+            @OnLifecycleEvent(Lifecycle.Event.ON_START)
+            fun onStart() {
+            }
+
+            @OnLifecycleEvent(Lifecycle.Event.ON_RESUME)
+            fun onResume() {
+            }
+
+            @OnLifecycleEvent(Lifecycle.Event.ON_PAUSE)
+            fun onPause() {
+            }
+
+            @OnLifecycleEvent(Lifecycle.Event.ON_STOP)
+            fun onStop() {
+            }
+
+            @OnLifecycleEvent(Lifecycle.Event.ON_DESTROY)
+            fun onDestroy() {
             }
         })
     }

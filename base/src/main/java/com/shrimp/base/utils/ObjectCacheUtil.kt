@@ -18,6 +18,7 @@ val Context.dataStore: DataStore<Preferences> by preferencesDataStore(name = "ap
 
 /**
  * Created by chasing on 2021/11/8.
+ * 使用DataStore进行缓存对象
  */
 class ObjectCacheUtil(val context: Context) {
 

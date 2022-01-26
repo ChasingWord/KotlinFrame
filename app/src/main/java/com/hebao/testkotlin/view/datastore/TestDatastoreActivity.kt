@@ -2,8 +2,10 @@ package com.hebao.testkotlin.view.datastore
 
 import android.content.Context
 import android.widget.Toast
+import com.hebao.testkotlin.R
 import com.hebao.testkotlin.databinding.ActivityTestDatastoreBinding
 import com.shrimp.base.utils.ObjectCacheUtil
+import com.shrimp.base.utils.StatusBarUtil
 import com.shrimp.base.view.BaseActivity
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
@@ -35,6 +37,11 @@ class TestDatastoreActivity : BaseActivity<TestDatastoreViewModel, ActivityTestD
     override fun getViewModelClass(): Class<TestDatastoreViewModel> = TestDatastoreViewModel::class.java
 
     override fun inflateDataBinding(): ActivityTestDatastoreBinding = ActivityTestDatastoreBinding.inflate(layoutInflater)
+
+    override fun changeConfig() {
+        needChangeStatusBar= false
+        StatusBarUtil.setFullScreen(this)
+    }
 
     override fun initView() {
         dataBinding.first.setOnClickListener {
