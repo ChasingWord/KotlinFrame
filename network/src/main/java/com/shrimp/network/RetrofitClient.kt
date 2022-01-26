@@ -12,7 +12,7 @@ import java.util.concurrent.TimeUnit
  * Created by chasing on 2021/10/21.
  */
 object RetrofitClient {
-    private const val IP = "http://192.168.100.231/"
+    private const val IP = "http://192.168.100.231:8888/"
 
     private lateinit var retrofit: Retrofit
     private val clock = Any()

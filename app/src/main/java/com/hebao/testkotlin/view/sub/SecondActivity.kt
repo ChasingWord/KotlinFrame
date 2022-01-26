@@ -5,6 +5,7 @@ import android.view.View
 import androidx.recyclerview.widget.LinearLayoutManager
 import com.hebao.testkotlin.R
 import com.hebao.testkotlin.databinding.ActivitySecondBinding
+import com.shrimp.base.adapter.recycler.BaseRecyclerAdapter
 import com.shrimp.base.decoration.HorizontalDividerItemDecoration
 import com.shrimp.base.utils.image_load.ImageLoadUtil
 import com.shrimp.base.view.BaseActivity
@@ -49,6 +50,13 @@ class SecondActivity : BaseActivity<SecondViewModel, ActivitySecondBinding>() {
         )
         secondAdapter = SecondAdapter(context)
         dataBinding.rcv.adapter = secondAdapter
+
+        secondAdapter.setItemClickListener(object : BaseRecyclerAdapter.ItemClickListener {
+            override fun onItemClick(position: Int) {
+                val item = secondAdapter.getItem(position)
+                baseViewModel.title.value = item.Name
+            }
+        })
     }
 
     override fun initDataObserve() {
