@@ -33,13 +33,13 @@ abstract class BaseFragment<VM : BaseFragmentViewModel, B : ViewDataBinding> : F
     // 判断是否销毁了dataBinding，避免销毁之后再进行使用
     protected var isDestroyView = false
 
-    protected lateinit var baseViewModel: VM
+    protected lateinit var viewModel: VM
     protected lateinit var dataBinding: B
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        baseViewModel = ViewModelProvider(this).get(getViewModelClass())
-        lifecycle.addObserver(baseViewModel)
+        viewModel = ViewModelProvider(this).get(getViewModelClass())
+        lifecycle.addObserver(viewModel)
     }
 
     override fun onCreateView(
@@ -53,13 +53,13 @@ abstract class BaseFragment<VM : BaseFragmentViewModel, B : ViewDataBinding> : F
         dialog = ProgressDialog()
         dialog.isCancelable = true
 
-        baseViewModel.dialogShow.observe(viewLifecycleOwner) { isShow ->
+        viewModel.dialogShow.observe(viewLifecycleOwner) { isShow ->
             if (isShow)
                 showLoading()
             else
                 hideLoading()
         }
-        baseViewModel.handleBundle(arguments)
+        viewModel.handleBundle(arguments)
         return dataBinding.root
     }
 
@@ -74,7 +74,8 @@ abstract class BaseFragment<VM : BaseFragmentViewModel, B : ViewDataBinding> : F
         super.onViewCreated(view, savedInstanceState)
         initView()
         initDataObserve()
-        baseViewModel.loadingData()
+
+        viewModel.loadingData()
     }
 
     /**

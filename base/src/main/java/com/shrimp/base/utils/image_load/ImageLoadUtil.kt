@@ -1,6 +1,7 @@
 package com.shrimp.base.utils.image_load
 
 import android.widget.ImageView
+import coil.clear
 import coil.load
 import coil.request.ImageRequest
 import coil.size.OriginalSize
@@ -27,16 +28,19 @@ object ImageLoadUtil {
 
     // region 无圆角
     fun load(imageView: ImageView, resId: Int) {
+        imageView.clear()
         imageView.load(resId)
     }
 
     fun load(imageView: ImageView, url: String) {
+        imageView.clear()
         imageView.load(url) {
             error(getErrorResId(ERROR_TYPE_NORMAL))
         }
     }
 
     fun loadFile(imageView: ImageView, filePath: String) {
+        imageView.clear()
         imageView.load(FileUtil.getFileUri(imageView.context, filePath)) {
             error(getErrorResId(ERROR_TYPE_NORMAL))
         }
@@ -60,6 +64,7 @@ object ImageLoadUtil {
      */
 
     fun loadRound(imageView: ImageView, resId: Int, radius: Float) {
+        imageView.clear()
         imageView.load(resId) {
             transformations(RoundedCornersTransformation(radius).also {
                 // 不设置OriginalSize，在切圆角时会按照控件大小裁剪图片，导致不是FitCenter样式
@@ -70,6 +75,7 @@ object ImageLoadUtil {
     }
 
     fun loadRound(imageView: ImageView, url: String, radius: Float) {
+        imageView.clear()
         imageView.load(url) {
             transformations(RoundedCornersTransformation(radius).also {
                 if (imageView.scaleType == ImageView.ScaleType.FIT_CENTER)
@@ -84,6 +90,7 @@ object ImageLoadUtil {
     }
 
     fun loadRound(imageView: ImageView, url: String, radius: Float, errorType: Int) {
+        imageView.clear()
         imageView.load(url) {
             transformations(RoundedCornersTransformation(radius).also {
                 if (imageView.scaleType == ImageView.ScaleType.FIT_CENTER)
@@ -101,6 +108,7 @@ object ImageLoadUtil {
         imageView: ImageView, url: String, radius: Float, errorType: Int,
         strokeWidth: Float, strokeColor: Int
     ) {
+        imageView.clear()
         imageView.load(url) {
             transformations(
                 CoilRoundedCornersTransformation(
@@ -120,6 +128,7 @@ object ImageLoadUtil {
     }
 
     fun loadRoundFile(imageView: ImageView, filePath: String, radius: Float) {
+        imageView.clear()
         imageView.load(FileUtil.getFileUri(imageView.context, filePath)) {
             transformations(RoundedCornersTransformation(radius).also {
                 if (imageView.scaleType == ImageView.ScaleType.FIT_CENTER)

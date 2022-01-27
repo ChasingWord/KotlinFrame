@@ -20,7 +20,7 @@ class SecondViewModel(application: Application) : BaseActivityModel(application)
 
     private var repository = SecondRepository()
 
-    override fun loadingData() {
+    override fun loadData() {
         repository.getLocalData(getApplication(), viewModelScope)
         get()
         repository.getTags(object : AbstractCallBack<List<Tags>>() {

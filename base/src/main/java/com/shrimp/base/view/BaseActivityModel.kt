@@ -19,7 +19,7 @@ abstract class BaseActivityModel(application: Application) : AndroidViewModel(ap
 
     open fun handleIntent(intent: Intent) {}
 
-    open fun loadingData() {}
+    open fun loadData() {}
 
     @OnLifecycleEvent(Lifecycle.Event.ON_START)
     open fun onStart() {

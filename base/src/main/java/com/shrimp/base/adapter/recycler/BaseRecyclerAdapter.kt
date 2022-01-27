@@ -4,11 +4,11 @@ import android.annotation.SuppressLint
 import android.content.Context
 import android.view.LayoutInflater
 import android.view.MotionEvent
+import android.view.View
 import android.view.ViewGroup
 import androidx.databinding.DataBindingUtil
 import androidx.databinding.ViewDataBinding
 import androidx.recyclerview.widget.RecyclerView
-import com.shrimp.base.utils.L
 
 /**
  * Created by chasing on 2021/10/25.
@@ -17,7 +17,7 @@ abstract class BaseRecyclerAdapter<T>(var context: Context) :
     RecyclerView.Adapter<RecyclerView.ViewHolder>() {
     private var data: MutableList<T> = ArrayList()
     private var layoutId: Int = 0
-    private lateinit var dataBinding: ViewDataBinding
+    private val dataBindingMap: HashMap<View, ViewDataBinding> = HashMap()
     private var isMultiItemType = false
     private lateinit var recyclerMultiItemTypeSupport: IRecyclerMultiItemTypeSupport<T>
 
@@ -53,12 +53,13 @@ abstract class BaseRecyclerAdapter<T>(var context: Context) :
             recyclerMultiItemTypeSupport.dataBindingMap[dataBinding.root] = dataBinding
             object : RecyclerView.ViewHolder(dataBinding.root) {}
         } else {
-            dataBinding = DataBindingUtil.inflate(
+            val dataBinding = DataBindingUtil.inflate<ViewDataBinding>(
                 LayoutInflater.from(parent.context),
                 layoutId,
                 parent,
                 false
             )
+            dataBindingMap[dataBinding.root] = dataBinding
             object : RecyclerView.ViewHolder(dataBinding.root) {}
         }
     }
@@ -71,7 +72,7 @@ abstract class BaseRecyclerAdapter<T>(var context: Context) :
         val itemViewType = getItemViewType(position)
         val dataBinding =
             if (isMultiItemType) recyclerMultiItemTypeSupport.getDataBinding(holder.itemView)
-            else this.dataBinding
+            else dataBindingMap[holder.itemView]
         if (dataBinding != null)
             convert(itemViewType, dataBinding, t)
     }
@@ -89,7 +90,7 @@ abstract class BaseRecyclerAdapter<T>(var context: Context) :
             val itemViewType = getItemViewType(position)
             val dataBinding =
                 if (isMultiItemType) recyclerMultiItemTypeSupport.getDataBinding(holder.itemView)
-                else this.dataBinding
+                else dataBindingMap[holder.itemView]
 
             // 移除相同的payload，避免重复处理
             val truePayLoads: MutableList<String> = ArrayList()

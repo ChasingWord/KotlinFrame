@@ -35,7 +35,7 @@ abstract class BaseActivity<VM : BaseActivityModel, B : ViewDataBinding> : AppCo
     private var showLoadingTime: Long = 0
     private val handler = Handler(Looper.getMainLooper())
 
-    protected lateinit var baseViewModel: VM
+    protected lateinit var viewModel: VM
     protected lateinit var dataBinding: B
 
     protected var needChangeStatusBar = true
@@ -89,19 +89,21 @@ abstract class BaseActivity<VM : BaseActivityModel, B : ViewDataBinding> : AppCo
         dialog = ProgressDialog()
         dialog.isCancelable = true
 
-        baseViewModel = ViewModelProvider(this).get(getViewModelClass())
-        baseViewModel.dialogShow.observe(this) { isShow ->
+        viewModel = ViewModelProvider(this).get(getViewModelClass())
+        viewModel.dialogShow.observe(this) { isShow ->
             if (isShow)
                 showLoading()
             else
                 hideLoading()
         }
-        baseViewModel.handleIntent(intent)
-        baseViewModel.loadingData()
+        viewModel.handleIntent(intent)
+        lifecycle.addObserver(viewModel)
 
-        lifecycle.addObserver(baseViewModel)
         initView()
         initDataObserve()
+
+        viewModel.loadData()
+        loadData()
     }
 
     /**
@@ -126,6 +128,14 @@ abstract class BaseActivity<VM : BaseActivityModel, B : ViewDataBinding> : AppCo
      * 初始化ViewModel的数据监听
      */
     abstract fun initDataObserve()
+
+    /**
+     * 需要使用Activity进行加载数据的情形，例如：加载本地相册需要使用FragementActivity
+     * 其它数据加载写在ViewModel
+     */
+    open fun loadData() {
+
+    }
 
     override fun onResume() {
         super.onResume()

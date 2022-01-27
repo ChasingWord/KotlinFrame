@@ -70,5 +70,13 @@
             app:layout_constraintStart_toStartOf="@id/firstDelete"
             app:layout_constraintTop_toTopOf="@id/second" />
 
+        <androidx.recyclerview.widget.RecyclerView
+            android:id="@+id/rcvImg"
+            android:layout_width="match_parent"
+            android:layout_height="0dp"
+            android:layout_marginTop="20dp"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintTop_toBottomOf="@id/second" />
+
     </androidx.constraintlayout.widget.ConstraintLayout>
 </layout>

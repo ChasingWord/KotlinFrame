@@ -17,14 +17,22 @@ import kotlin.math.abs
 /**
  * Created by chasing on 2021/10/22.
  */
-class DividerGridItemDecoration (var context: Context): RecyclerView.ItemDecoration() {
+class DividerGridItemDecoration(var context: Context) : RecyclerView.ItemDecoration() {
 
+    private val mAttrs = intArrayOf(android.R.attr.listDivider)
     private var mDivider: Drawable? = null
     private var mPaint: Paint? = null
     private var mColorResId = 0
     private var preHorizontalBottom = 0
     private var mHorizontalLineWidth = 0
     private var mVerticalLineWidth = 0
+
+    init {
+        val a = context.obtainStyledAttributes(mAttrs)
+        mDivider = a.getDrawable(0)
+        a.recycle()
+        mPaint = Paint()
+    }
 
     fun colorResId(@ColorRes resId: Int): DividerGridItemDecoration {
         mColorResId = resId
@@ -65,7 +73,9 @@ class DividerGridItemDecoration (var context: Context): RecyclerView.ItemDecorat
         for (i in 0 until childCount) {
             val child: View = parent.getChildAt(i)
             // 最后一条不画
-            if (parent.getChildLayoutPosition(child) == (parent.layoutManager?.itemCount ?: 0) - 1) {
+            if (parent.getChildLayoutPosition(child) == (parent.layoutManager?.itemCount
+                    ?: 0) - 1
+            ) {
                 continue
             }
             if (mHorizontalLineWidth > 0) {

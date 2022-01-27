@@ -20,9 +20,8 @@ val Context.dataStore: DataStore<Preferences> by preferencesDataStore(name = "ap
  * Created by chasing on 2021/11/8.
  * 使用DataStore进行缓存对象
  */
-class ObjectCacheUtil(val context: Context) {
-
-    suspend inline fun <reified T> read(key: String, crossinline func: (T) -> Unit) =
+object ObjectCacheUtil {
+    suspend inline fun <reified T> read(context: Context, key: String, crossinline func: (T) -> Unit) =
         coroutineScope {
             try {
                 context.dataStore.data
@@ -66,7 +65,7 @@ class ObjectCacheUtil(val context: Context) {
             }
         }
 
-    suspend fun save(key: String, value: Any) {
+    suspend fun save(context: Context, key: String, value: Any) {
         context.dataStore.edit { mutablePreferences ->
             when (value) {
                 is Int -> mutablePreferences[intPreferencesKey(key)] = value
@@ -79,7 +78,7 @@ class ObjectCacheUtil(val context: Context) {
         }
     }
 
-    suspend fun remove(key: String, kClass: KClass<*>) {
+    suspend fun remove(context: Context, key: String, kClass: KClass<*>) {
         context.dataStore.edit { mutablePreferences ->
             when (kClass) {
                 Int::class -> mutablePreferences.remove(intPreferencesKey(key))
@@ -92,7 +91,7 @@ class ObjectCacheUtil(val context: Context) {
         }
     }
 
-    suspend fun clear() {
+    suspend fun clear(context: Context) {
         context.dataStore.edit { mutablePreferences ->
             mutablePreferences.clear()
         }
