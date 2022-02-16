@@ -21,7 +21,7 @@ abstract class BookDatabase : RoomDatabase() {
         private var instance: BookDatabase? = null
         private val MIGRATION_LIST = arrayOf(Migration1To2)
 
-        fun getDao(applicationContext: Context): BookDao? {
+        fun getDao(applicationContext: Context): BookDao {
             if (instance == null) {
                 synchronized(BookDatabase::class) {
                     if (instance == null) {
@@ -35,7 +35,7 @@ abstract class BookDatabase : RoomDatabase() {
                     }
                 }
             }
-            return instance?.dao
+            return instance!!.dao
         }
 
         private object CreatedCallBack : RoomDatabase.Callback() {

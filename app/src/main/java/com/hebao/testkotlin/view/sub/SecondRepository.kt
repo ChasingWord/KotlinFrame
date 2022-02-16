@@ -37,11 +37,11 @@ class SecondRepository {
     fun getLocalData(context: Context, viewModelScope: CoroutineScope) {
         viewModelScope.launch(Dispatchers.IO) {
             val manDao = ManDatabase.getDao(context.applicationContext)
-            val loadMan = manDao?.loadMan()
+            val loadMan = manDao.loadMan()
 
             val bookDao = BookDatabase.getDao(context.applicationContext)
             val book = Book(0, "book")
-            val id = bookDao?.insert(book)
+            val id = bookDao.insert(book)
 
             val i = 1
         }

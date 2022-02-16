@@ -1,6 +1,7 @@
 package com.hebao.testkotlin.db.dao
 
-import androidx.room.*
+import androidx.room.Dao
+import androidx.room.Query
 import com.hebao.testkotlin.db.base.BaseDao
 import com.hebao.testkotlin.db.entity.Man
 import com.hebao.testkotlin.db.entity.Person
@@ -9,7 +10,8 @@ import com.hebao.testkotlin.db.entity.Person
  * Created by chasing on 2021/10/26.
  */
 @Dao
-interface ManDao:BaseDao<Man> {
+interface ManDao : BaseDao<Man> {
+
     @Query("SELECT * FROM Man")
     suspend fun loadMan(): Array<Man>
 

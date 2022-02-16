@@ -1,10 +1,14 @@
 package com.shrimp.base.utils
 
+import android.annotation.SuppressLint
 import android.graphics.LinearGradient
 import android.graphics.Shader
+import android.view.MotionEvent
 import android.view.View
 import android.widget.EditText
 import android.widget.TextView
+import androidx.recyclerview.widget.RecyclerView
+import kotlin.math.abs
 
 /**
  * EditText竖直方向是否可以滚动
@@ -58,4 +62,25 @@ fun TextView.setGradientTextColor(startColor: Int, endColor: Int) {
     )
     paint.shader = mLinearGradient
     invalidate()
+}
+
+//设置列表空白出的点击响应
+private var scrollWorkX = 0f
+private var scrollWorkY = 0f
+
+@SuppressLint("ClickableViewAccessibility")
+fun RecyclerView.setOnTouchRecyclerView(onClickListener: View.OnClickListener) {
+    setOnTouchListener { v: View, event: MotionEvent ->
+        if (event.action == MotionEvent.ACTION_DOWN) {
+            scrollWorkX = event.x
+            scrollWorkY = event.y
+        }
+        if (event.action == MotionEvent.ACTION_UP) {
+            if (v.id != 0 && abs(scrollWorkX - event.x) <= 5 && abs(scrollWorkY - event.y) <= 5) {
+                //recyclerView空白处点击事件
+                onClickListener.onClick(v)
+            }
+        }
+        false
+    }
 }

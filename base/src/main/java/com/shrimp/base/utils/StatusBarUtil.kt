@@ -61,7 +61,7 @@ object StatusBarUtil {
         setRootView(activity, true)
     }
 
-    fun hideCustomStatusBarView(activity: Activity) {
+    private fun hideCustomStatusBarView(activity: Activity) {
         val contentView = activity.findViewById<ViewGroup>(android.R.id.content)
         val fakeStatusBarView = contentView.findViewById<View>(
             FAKE_STATUS_BAR_VIEW_ID
@@ -155,6 +155,7 @@ object StatusBarUtil {
     }
 
     // </editor-fold>
+
     // <editor-fold desc="切换状态栏字体颜色（黑白）,默认是白色">
     //1.对于miui，适配6.0以下
     //字体颜色是否设置为黑色。注：只是设置字体颜色，不进行设置背景栏颜色
@@ -205,6 +206,7 @@ object StatusBarUtil {
     }
 
     // </editor-fold>
+
     //设置全屏状态--隐藏StatusBar
     fun setFullScreen(aty: Activity) {
         //5.0及以上

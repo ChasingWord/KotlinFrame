@@ -9,6 +9,7 @@ import androidx.navigation.fragment.findNavController
 import com.hebao.testkotlin.R
 import com.hebao.testkotlin.databinding.FragmentFirstBinding
 import com.hebao.testkotlin.view.datastore.TestDatastoreActivity
+import com.hebao.testkotlin.view.meituan.MeiTuanActivity
 import com.hebao.testkotlin.view.sub.SecondActivity
 import com.scwang.smart.refresh.layout.api.RefreshLayout
 import com.scwang.smart.refresh.layout.listener.OnRefreshListener
@@ -45,6 +46,9 @@ class FirstFragment : Fragment(), OnRefreshListener {
         }
         binding.textviewSecond.setOnClickListener {
             TestDatastoreActivity.start(requireContext())
+        }
+        binding.textviewMeituan.setOnClickListener{
+            MeiTuanActivity.start(requireContext())
         }
 
         binding.refreshLayout.setOnRefreshListener(this)

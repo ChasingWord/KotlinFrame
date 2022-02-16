@@ -42,6 +42,7 @@
         </activity>
         <activity android:name=".view.sub.SecondActivity" />
         <activity android:name=".view.datastore.TestDatastoreActivity" />
+        <activity android:name=".view.meituan.MeiTuanActivity" />
     </application>
 
 </manifest>
