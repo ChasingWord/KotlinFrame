@@ -27,16 +27,16 @@ abstract class ManDatabase : RoomDatabase() {
                     if (instance == null) {
                         instance = Room.databaseBuilder(
                             applicationContext, ManDatabase::class.java,
-                            "self.db"
-                        )
-                            .addCallback(CreatedCallBack)
-                            .addMigrations(*MIGRATION_LIST)
-                            .build()
+                                "self.db"
+                            )
+                                .addCallback(CreatedCallBack)
+                                .addMigrations(*MIGRATION_LIST)
+                                .build()
+                        }
                     }
                 }
+                return instance!!.dao
             }
-            return instance!!.dao
-        }
 
         private object CreatedCallBack : RoomDatabase.Callback() {
             override fun onCreate(db: SupportSQLiteDatabase) {

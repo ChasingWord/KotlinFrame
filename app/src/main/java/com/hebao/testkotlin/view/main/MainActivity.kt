@@ -7,7 +7,10 @@ import android.graphics.Path
 import android.os.Build
 import android.os.Bundle
 import android.util.Log
-import android.view.*
+import android.view.DragEvent
+import android.view.Menu
+import android.view.MenuItem
+import android.view.View
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.content.ContextCompat
 import androidx.navigation.findNavController
@@ -32,7 +35,10 @@ class MainActivity : AppCompatActivity() {
         binding = ActivityMainBinding.inflate(layoutInflater)
         setContentView(binding.root)
 
-        StatusBarUtil.setColorDiff(this, ContextCompat.getColor(this, R.color.design_default_color_error))
+        StatusBarUtil.setColorDiff(
+            this,
+            ContextCompat.getColor(this, R.color.design_default_color_error)
+        )
 
         setSupportActionBar(binding.toolbar)
 
@@ -129,6 +135,25 @@ class MainActivity : AppCompatActivity() {
                 DragEvent.ACTION_DROP -> Log.i("aaa", "释放拖拽的view")
             }
             return@setOnDragListener true
+        }
+    }
+
+    fun rotate(matrix: Array<IntArray>): Unit {
+        val maxIndex = matrix.size - 1
+        for (i in 0..maxIndex) {
+            for (j in 0..matrix.size / 2) {
+                val temp = matrix[i][j]
+                matrix[i][j] = matrix[i][maxIndex - j]
+                matrix[i][maxIndex - j] = temp
+            }
+        }
+
+        for (i in 0..maxIndex) {
+            for (j in 0..maxIndex - i - 1) {
+                val temp = matrix[i][j]
+                matrix[i][j] = matrix[maxIndex - j][maxIndex - i]
+                matrix[maxIndex - j][maxIndex - i] = temp
+            }
         }
     }
 

@@ -15,8 +15,8 @@ import com.shrimp.base.view.BaseActivity
  */
 class MeiTuanActivity : BaseActivity<MeiTuanViewModel, ActivityMeituanBinding>() {
 
-    companion object{
-        fun start(context: Context){
+    companion object {
+        fun start(context: Context) {
             start(context, MeiTuanActivity::class.java)
         }
     }
