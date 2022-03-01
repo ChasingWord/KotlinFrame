@@ -82,6 +82,11 @@ class TestDatastoreActivity : BaseActivity<TestDatastoreViewModel, ActivityTestD
         dataBinding.secondDelete.setOnClickListener {
             CoroutineScope(Dispatchers.IO).launch {
                 ObjectCacheUtil.remove(context, "key_int", Int::class)
+
+                val root = TreeNode(2)
+                root.left = TreeNode(1)
+                root.right = TreeNode(3)
+                isValidBST(root)
             }
         }
 
@@ -91,6 +96,22 @@ class TestDatastoreActivity : BaseActivity<TestDatastoreViewModel, ActivityTestD
         dataBinding.rcvImg.addItemDecoration(DividerGridItemDecoration(context).colorResId(R.color.transparent)
             .widthResId(R.dimen.dp_4).widthOfVerticalResId(R.dimen.dp_4))
     }
+
+    fun isValidBST(root: TreeNode?): Boolean {
+        return isValid(root, Int.MIN_VALUE - 1, Int.MAX_VALUE + 1)
+    }
+
+    fun isValid(root: TreeNode?, minVal: Int, maxVal: Int): Boolean{
+        if (root == null) return true
+        val leftValid = root.left == null || root.left!!.`val` in (minVal + 1..root.`val` - 1)
+        val rightValid = root.right == null || root.right!!.`val` in (root.`val` + 1..maxVal - 1)
+        return leftValid && rightValid && isValid(root.left, minVal, root.`val`) && isValid(root.right, root.`val`, maxVal)
+    }
+
+    class TreeNode(var `val`: Int) {
+         var left: TreeNode? = null
+         var right: TreeNode? = null
+     }
 
     override fun initDataObserve() {
         viewModel.folderList.observe(this) {

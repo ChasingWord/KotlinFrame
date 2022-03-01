@@ -8,6 +8,7 @@ import androidx.fragment.app.Fragment
 import androidx.navigation.fragment.findNavController
 import com.hebao.testkotlin.R
 import com.hebao.testkotlin.databinding.FragmentFirstBinding
+import com.hebao.testkotlin.view.chart.ChartActivity
 import com.hebao.testkotlin.view.datastore.TestDatastoreActivity
 import com.hebao.testkotlin.view.meituan.MeiTuanActivity
 import com.hebao.testkotlin.view.sub.SecondActivity
@@ -40,6 +41,9 @@ class FirstFragment : Fragment(), OnRefreshListener {
         super.onViewCreated(view, savedInstanceState)
         binding.buttonFirst.setOnClickListener {
             findNavController().navigate(R.id.action_FirstFragment_to_SecondFragment)
+        }
+        binding.chart.setOnClickListener {
+            ChartActivity.start(requireContext())
         }
         binding.textviewFirst.setOnClickListener {
             SecondActivity.start(requireContext())

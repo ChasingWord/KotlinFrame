@@ -138,25 +138,6 @@ class MainActivity : AppCompatActivity() {
         }
     }
 
-    fun rotate(matrix: Array<IntArray>): Unit {
-        val maxIndex = matrix.size - 1
-        for (i in 0..maxIndex) {
-            for (j in 0..matrix.size / 2) {
-                val temp = matrix[i][j]
-                matrix[i][j] = matrix[i][maxIndex - j]
-                matrix[i][maxIndex - j] = temp
-            }
-        }
-
-        for (i in 0..maxIndex) {
-            for (j in 0..maxIndex - i - 1) {
-                val temp = matrix[i][j]
-                matrix[i][j] = matrix[maxIndex - j][maxIndex - i]
-                matrix[maxIndex - j][maxIndex - i] = temp
-            }
-        }
-    }
-
     fun main() = CoroutineScope(Dispatchers.IO).launch { // t
         // his: CoroutineScope
         coroutineScope {
