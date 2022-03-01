@@ -1,10 +1,7 @@
 package com.hebao.testkotlin.widget
 
 import android.content.Context
-import android.graphics.Canvas
-import android.graphics.Color
-import android.graphics.Paint
-import android.graphics.Path
+import android.graphics.*
 import android.util.AttributeSet
 import android.view.View
 import com.shrimp.base.utils.GenericTools
@@ -23,6 +20,7 @@ class ChartView(context: Context?, attr: AttributeSet?, defStyleAttr: Int) :
     private val coordinateTextPaint = Paint()
     private val androidPaint = Paint()
     private val iosPaint = Paint()
+    private val guidelinePaint = Paint()
 
     private val androidDailyInfoList = ArrayList<DailyInfo>()
     private val iosDailyInfoList = ArrayList<DailyInfo>()
@@ -65,6 +63,11 @@ class ChartView(context: Context?, attr: AttributeSet?, defStyleAttr: Int) :
         iosPaint.style = Paint.Style.STROKE
         iosPaint.textAlign = Paint.Align.CENTER
         iosPaint.textSize = GenericTools.dip2px(getContext(), 15f).toFloat()
+
+        guidelinePaint.color = Color.parseColor("#aeaeae")
+        guidelinePaint.isAntiAlias = true
+        guidelinePaint.style = Paint.Style.STROKE
+        guidelinePaint.pathEffect = DashPathEffect(floatArrayOf(4f, 4f), 0f)
     }
 
     override fun onMeasure(widthMeasureSpec: Int, heightMeasureSpec: Int) {
@@ -177,6 +180,10 @@ class ChartView(context: Context?, attr: AttributeSet?, defStyleAttr: Int) :
                     coordinateTextPaint,
                     90f)
                 canvas.drawPoint(offset + i * yPieceInterval, offset, coordinateTextPaint)
+
+                if (i != 0 && i != maxYPieceCount)
+                    canvas.drawLine(offset + i * yPieceInterval, offset,
+                        offset + i * yPieceInterval, offset + totalHeight, guidelinePaint)
             }
 
             // 绘制x轴刻度
@@ -188,8 +195,11 @@ class ChartView(context: Context?, attr: AttributeSet?, defStyleAttr: Int) :
                     offset - coordinateTextPaint.textSize / 2 - 20,
                     offset + xPieceInterval * (i + 1),
                     coordinateTextPaint,
-                    90f);
+                    90f)
                 canvas.drawPoint(offset, offset + xPieceInterval * (i + 1), coordinateTextPaint)
+
+                canvas.drawLine(offset, offset + xPieceInterval * (i + 1),
+                    offset + totalWidth, offset + xPieceInterval * (i + 1), guidelinePaint)
             }
 
             // 绘制android点
@@ -203,13 +213,13 @@ class ChartView(context: Context?, attr: AttributeSet?, defStyleAttr: Int) :
             androidPaint.style = Paint.Style.STROKE
             if (androidNumPath != null) {
                 canvas.drawPath(androidNumPath!!, androidPaint)
-                canvas.drawPoints(androidPoints.toFloatArray(), coordinatePaint)
+                canvas.drawPoints(androidPoints.toFloatArray(), coordinateTextPaint)
 
                 coordinateTextPaint.textSize = GenericTools.dip2px(context, 10f).toFloat()
                 for (index in androidPoints.indices step 2) {
                     drawText(canvas,
                         androidDailyInfoList[index / 2].num.toString(),
-                        androidPoints[index],
+                        androidPoints[index] + 12,
                         androidPoints[index + 1],
                         coordinateTextPaint,
                         90f)
@@ -227,13 +237,13 @@ class ChartView(context: Context?, attr: AttributeSet?, defStyleAttr: Int) :
             iosPaint.style = Paint.Style.STROKE
             if (iosNumPath != null) {
                 canvas.drawPath(iosNumPath!!, iosPaint)
-                canvas.drawPoints(iosPoints.toFloatArray(), coordinatePaint)
+                canvas.drawPoints(iosPoints.toFloatArray(), coordinateTextPaint)
 
                 coordinateTextPaint.textSize = GenericTools.dip2px(context, 10f).toFloat()
                 for (index in iosPoints.indices step 2) {
                     drawText(canvas,
                         iosDailyInfoList[index / 2].num.toString(),
-                        iosPoints[index],
+                        iosPoints[index] + 12,
                         iosPoints[index + 1],
                         coordinateTextPaint,
                         90f)
