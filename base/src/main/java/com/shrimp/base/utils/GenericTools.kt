@@ -19,11 +19,6 @@ object GenericTools {
      */
     fun getScreenHeight(activity: Activity?): Int {
         return activity?.resources?.displayMetrics?.heightPixels ?: 0
-//        if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.R) {
-//            WindowMetrics metrics = activity.getWindowManager().getCurrentWindowMetrics();
-//            int width = metrics.getBounds().width();
-//            int height = metrics.getBounds().height();
-//        }
     }
 
     /**
@@ -31,11 +26,6 @@ object GenericTools {
      */
     fun getScreenWidth(activity: Activity?): Int {
         return activity?.resources?.displayMetrics?.widthPixels ?: 0
-//        if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.R) {
-//            WindowMetrics metrics = activity.getWindowManager().getCurrentWindowMetrics();
-//            int width = metrics.getBounds().width();
-//            int height = metrics.getBounds().height();
-//        }
     }
 
     /**

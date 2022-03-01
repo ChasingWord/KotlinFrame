@@ -14,7 +14,7 @@ import com.scwang.smart.refresh.layout.SmartRefreshLayout
 import com.shrimp.base.widgets.refresh.SmartRefreshFooter
 import com.shrimp.base.widgets.refresh.SmartRefreshHeader
 import okhttp3.OkHttpClient
-
+import com.shrimp.base.utils.CrashErrorHandler
 
 /**
  * Created by chasing on 2021/11/3.
@@ -51,6 +51,6 @@ class MyApp : Application(), ImageLoaderFactory {
 
     override fun onCreate() {
         super.onCreate()
-        CrashErrorHandler.getInstance().init(this)
+        CrashErrorHandler.init(this)
     }
 }

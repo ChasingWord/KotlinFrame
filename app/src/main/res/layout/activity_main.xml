@@ -31,16 +31,20 @@
         android:layout_gravity="bottom|end"
         android:layout_marginEnd="@dimen/fab_margin"
         android:layout_marginBottom="16dp"
-        app:backgroundTint="#eeeeee"
-        app:rippleColor="#eeeeee"
+        app:backgroundTint="#7f9988"
+        app:rippleColor="#7f9988"
         app:srcCompat="@android:drawable/ic_menu_camera" />
 
-    <com.google.android.material.floatingactionbutton.FloatingActionButton
+    <TextView
         android:id="@+id/fab_top"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
+        android:layout_width="50dp"
+        android:layout_height="50dp"
         android:layout_gravity="bottom|end"
         android:layout_marginEnd="@dimen/fab_margin"
         android:layout_marginBottom="90dp"
-        app:srcCompat="@android:drawable/ic_dialog_email" />
+        android:background="@drawable/shape_000000_90"
+        android:text="点击\n长按"
+        android:gravity="center"
+        android:textColor="@color/white"
+        android:textSize="15sp" />
 </androidx.coordinatorlayout.widget.CoordinatorLayout>
