@@ -5,6 +5,7 @@ import android.graphics.*
 import android.util.AttributeSet
 import android.view.View
 import com.shrimp.base.utils.GenericTools
+import java.util.*
 import kotlin.math.max
 
 /**
@@ -16,18 +17,25 @@ class ChartView(context: Context?, attr: AttributeSet?, defStyleAttr: Int) :
     constructor(context: Context?, attr: AttributeSet?) : this(context, attr, 0)
     constructor(context: Context?) : this(context, null)
 
-    private val coordinatePaint = Paint()
-    private val coordinateTextPaint = Paint()
-    private val androidPaint = Paint()
-    private val iosPaint = Paint()
+    // region 提供外部设置属性
+    private var isHorizontal = false
+    private var offset = 100f
+    private var arrowOffset = 12f
+    private var textOffset = 10f
+    private var axisTextSize = 15f
+    private var lineTextSize = 10f
+    // endregion
+
+    private val axisPaint = Paint()
+    private val axisTextPaint = Paint()
+    private val linePaint = Paint()
     private val guidelinePaint = Paint()
 
-    private val androidDailyInfoList = ArrayList<DailyInfo>()
-    private val iosDailyInfoList = ArrayList<DailyInfo>()
-
-    private var totalHeight = 0f
-    private var totalWidth = 0f
-    private val offset = 100f
+    private val chartBeanList = ArrayList<ArrayList<ChartBean>>()
+    private val chartBeanTypeList = ArrayList<String>()
+    private var xAxisLength = 0f
+    private var yAxisLength = 0f
+    private var maxXPieceIndex = 0
     private var maxXPieceCount = 0 //坐标x轴分片总数量
     private var xPieceInterval = 0f //坐标x轴分片间距
     private var maxYPieceCount = 0 //坐标y轴分片总数量
@@ -35,34 +43,25 @@ class ChartView(context: Context?, attr: AttributeSet?, defStyleAttr: Int) :
     private var yPieceInterval = 0f //坐标y轴分片间距
 
     private var maxY = 0 //数据中y轴方向包含的最大值
-    private var coordinatePath: Path? = null
-    private var androidPoints = mutableListOf<Float>()
-    private var androidNumPath: Path? = null
-    private var iosPoints = ArrayList<Float>()
-    private var iosNumPath: Path? = null
+    private var axisPath: Path? = null //坐标轴路径
+    private val pathMap = hashMapOf<String, Path?>()
+    private val pointsMap = hashMapOf<String, MutableList<Float>?>()
+    private val colorMap = hashMapOf<String, String>()
 
     init {
-        coordinatePaint.color = Color.BLACK
-        coordinatePaint.isAntiAlias = true
-        coordinatePaint.style = Paint.Style.STROKE
+        axisPaint.color = Color.BLACK
+        axisPaint.isAntiAlias = true
+        axisPaint.style = Paint.Style.STROKE
 
-        coordinateTextPaint.color = Color.BLACK
-        coordinateTextPaint.isAntiAlias = true
-        coordinateTextPaint.textAlign = Paint.Align.CENTER
-        coordinateTextPaint.textSize = GenericTools.dip2px(getContext(), 15f).toFloat()
-        coordinateTextPaint.strokeWidth = 6f
+        axisTextPaint.color = Color.BLACK
+        axisTextPaint.isAntiAlias = true
+        axisTextPaint.textAlign = Paint.Align.CENTER
+        axisTextPaint.strokeWidth = 6f
 
-        androidPaint.color = Color.parseColor("#3498fe")
-        androidPaint.isAntiAlias = true
-        androidPaint.textAlign = Paint.Align.CENTER
-        androidPaint.textSize = GenericTools.dip2px(getContext(), 15f).toFloat()
-        androidPaint.style = Paint.Style.STROKE
-
-        iosPaint.color = Color.parseColor("#fed851")
-        iosPaint.isAntiAlias = true
-        iosPaint.style = Paint.Style.STROKE
-        iosPaint.textAlign = Paint.Align.CENTER
-        iosPaint.textSize = GenericTools.dip2px(getContext(), 15f).toFloat()
+        linePaint.isAntiAlias = true
+        linePaint.style = Paint.Style.STROKE
+        linePaint.strokeWidth = 3f
+        linePaint.textAlign = Paint.Align.CENTER
 
         guidelinePaint.color = Color.parseColor("#aeaeae")
         guidelinePaint.isAntiAlias = true
@@ -72,31 +71,74 @@ class ChartView(context: Context?, attr: AttributeSet?, defStyleAttr: Int) :
 
     override fun onMeasure(widthMeasureSpec: Int, heightMeasureSpec: Int) {
         super.onMeasure(widthMeasureSpec, heightMeasureSpec)
-        totalHeight = measuredHeight - offset * 2
-        totalWidth = measuredWidth - offset * 2
+        if (isHorizontal) {
+            xAxisLength = measuredWidth - offset * 2
+            yAxisLength = measuredHeight - offset * 2
+        } else {
+            xAxisLength = measuredHeight - offset * 2
+            yAxisLength = measuredWidth - offset * 2
+        }
         refresh()
     }
 
-    fun setAndroidDailyInfo(dailyInfoList: List<DailyInfo>) {
-        androidDailyInfoList.addAll(dailyInfoList)
-        getMaxValue(dailyInfoList)
+    // region 外部调用方法
+    fun addChartBeanList(chartBeanType: String, chartBeanList: ArrayList<ChartBean>) {
+        this.chartBeanTypeList.add(chartBeanType)
+        this.chartBeanList.add(chartBeanList)
+        getMaxValue(chartBeanList)
+        colorMap[chartBeanType] = getRandColor()
+        refresh()
     }
 
-    fun setIOSDailyInfo(dailyInfoList: List<DailyInfo>) {
-        iosDailyInfoList.addAll(dailyInfoList)
-        getMaxValue(dailyInfoList)
-    }
-
-    private fun getMaxValue(dailyInfoList: List<DailyInfo>) {
-        if (dailyInfoList.isEmpty()) return
-        for (dailyInfo in dailyInfoList) {
-            maxY = max(maxY, dailyInfo.num)
+    fun setHorizontal(horizontal: Boolean) {
+        if (isHorizontal != horizontal) {
+            isHorizontal = horizontal
+            xAxisLength = yAxisLength.also { xAxisLength }
+            refresh()
         }
-        maxXPieceCount = max(maxXPieceCount, dailyInfoList.size + 1)
     }
 
-    fun refresh() {
-        if (maxXPieceCount == 0 || totalHeight == 0f || maxYPieceCount > 0) return
+    fun setOffset(offset: Float) {
+        if (this.offset != offset) {
+            xAxisLength = xAxisLength + 2 * this.offset - 2 * offset
+            yAxisLength = yAxisLength + 2 * this.offset - 2 * offset
+            this.offset = offset
+            refresh()
+        }
+    }
+
+    fun setArrowOffset(arrowOffset: Float) {
+        if (this.arrowOffset != arrowOffset) {
+            this.arrowOffset = arrowOffset
+            refresh()
+        }
+    }
+
+    fun setTextOffset(textOffset: Float) {
+        if (this.textOffset != textOffset) {
+            this.textOffset = textOffset
+            invalidate()
+        }
+    }
+
+    fun setAxisTextSize(axisTextSize: Float) {
+        if (this.axisTextSize != axisTextSize) {
+            this.axisTextSize = axisTextSize
+            invalidate()
+        }
+    }
+
+    fun setLineTextSize(lineTextSize: Float) {
+        if (this.lineTextSize != lineTextSize) {
+            this.lineTextSize = lineTextSize
+            invalidate()
+        }
+    }
+
+    private fun refresh() {
+        if (maxXPieceCount == 0 || xAxisLength == 0f) return
+        pathMap.clear()
+        pointsMap.clear()
 
         when {
             maxY <= 10 -> {
@@ -113,52 +155,90 @@ class ChartView(context: Context?, attr: AttributeSet?, defStyleAttr: Int) :
             }
         }
         maxYPieceCount = maxY / yPiece + 1
-        yPieceInterval = totalWidth / maxYPieceCount
-        xPieceInterval = totalHeight / maxXPieceCount
+        yPieceInterval = yAxisLength / maxYPieceCount
+        xPieceInterval = xAxisLength / maxXPieceCount
 
-        coordinatePath = Path()
-        coordinatePath?.moveTo(offset + totalWidth + 12, offset)
-        coordinatePath?.lineTo(offset, offset)
-        coordinatePath?.lineTo(offset, offset + totalHeight + 12)
-        coordinatePath?.lineTo(offset - 12, offset + totalHeight)
-        coordinatePath?.moveTo(offset, offset + totalHeight + 12)
-        coordinatePath?.lineTo(offset + 12, offset + totalHeight)
-        coordinatePath?.moveTo(offset + totalWidth + 12, offset)
-        coordinatePath?.lineTo(offset + totalWidth, offset - 12)
-        coordinatePath?.moveTo(offset + totalWidth + 12, offset)
-        coordinatePath?.lineTo(offset + totalWidth, offset + 12)
+        axisPath = Path()
+        if (isHorizontal) {
+            axisPath?.moveTo(offset, offset + yAxisLength + arrowOffset)
+            axisPath?.lineTo(offset + xAxisLength + arrowOffset, offset + yAxisLength + arrowOffset)
+            axisPath?.lineTo(offset + xAxisLength, offset + yAxisLength)
+            axisPath?.moveTo(offset + xAxisLength + arrowOffset, offset + yAxisLength + arrowOffset)
+            axisPath?.lineTo(offset + xAxisLength,
+                offset + yAxisLength + 2 * arrowOffset)
+            axisPath?.moveTo(offset, offset + yAxisLength + arrowOffset)
+            axisPath?.lineTo(offset, offset)
+            axisPath?.lineTo(offset - arrowOffset, offset + arrowOffset)
+            axisPath?.moveTo(offset, offset)
+            axisPath?.lineTo(offset + arrowOffset, offset + arrowOffset)
+        } else {
+            axisPath?.moveTo(offset + yAxisLength + arrowOffset, offset)
+            axisPath?.lineTo(offset, offset)
+            axisPath?.lineTo(offset, offset + xAxisLength + arrowOffset)
+            axisPath?.lineTo(offset - arrowOffset, offset + xAxisLength)
+            axisPath?.moveTo(offset, offset + xAxisLength + arrowOffset)
+            axisPath?.lineTo(offset + arrowOffset, offset + xAxisLength)
+            axisPath?.moveTo(offset + yAxisLength + arrowOffset, offset)
+            axisPath?.lineTo(offset + yAxisLength, offset - arrowOffset)
+            axisPath?.moveTo(offset + yAxisLength + arrowOffset, offset)
+            axisPath?.lineTo(offset + yAxisLength, offset + arrowOffset)
+        }
 
-        createPath(androidDailyInfoList, true)
-        createPath(iosDailyInfoList, false)
-
+        for (index in chartBeanList.indices) {
+            createPath(chartBeanTypeList[index], chartBeanList[index])
+        }
         invalidate()
     }
+    // endregion
 
-    private fun getDailyX(dailyInfo: DailyInfo): Float {
-        val count = dailyInfo.num / yPiece
-        val last = dailyInfo.num % yPiece
+    private fun getMaxValue(chartBeanList: List<ChartBean>) {
+        if (chartBeanList.isEmpty()) return
+        for (dailyInfo in chartBeanList) {
+            maxY = max(maxY, dailyInfo.num)
+        }
+        if (chartBeanList.size > maxXPieceCount) {
+            maxXPieceIndex = this.chartBeanList.size - 1
+        }
+        maxXPieceCount = max(maxXPieceCount, chartBeanList.size + 1)
+    }
+
+    private fun getHorizontalYAxis(chartBean: ChartBean): Float {
+        val count = chartBean.num / yPiece
+        val last = chartBean.num % yPiece
+        return yAxisLength + offset  + arrowOffset - (count * yPieceInterval + last * yPieceInterval / yPiece)
+    }
+
+    private fun getVerticalXAxis(chartBean: ChartBean): Float {
+        val count = chartBean.num / yPiece
+        val last = chartBean.num % yPiece
         return count * yPieceInterval + last * yPieceInterval / yPiece + offset
     }
 
-    private fun createPath(dailyInfoList: List<DailyInfo>, isAndroid: Boolean) {
-        if (dailyInfoList.isNotEmpty()) {
-            var path = if (isAndroid) androidNumPath else iosNumPath
-            val points = if (isAndroid) androidPoints else iosPoints
-            val xOffset = (maxXPieceCount - 1 - dailyInfoList.size) * xPieceInterval
+    private fun createPath(chartBeanType: String, chartBeanList: List<ChartBean>) {
+        if (chartBeanList.isNotEmpty()) {
+            var path = pathMap[chartBeanType]
+            var points = pointsMap[chartBeanType]
+            val xOffset = (maxXPieceCount - 1 - chartBeanList.size) * xPieceInterval
             var x: Float
             var y: Float
-            for (index in dailyInfoList.indices) {
-                x = getDailyX(dailyInfoList[index])
-                y = offset + (index + 1) * xPieceInterval + xOffset
+            for (index in chartBeanList.indices) {
+                if (isHorizontal) {
+                    x = offset + (index + 1) * xPieceInterval + xOffset
+                    y = getHorizontalYAxis(chartBeanList[index])
+                } else {
+                    x = getVerticalXAxis(chartBeanList[index])
+                    y = offset + (index + 1) * xPieceInterval + xOffset
+                }
                 if (path == null) {
                     path = Path()
-                    if (isAndroid)
-                        androidNumPath = path
-                    else
-                        iosNumPath = path
+                    pathMap[chartBeanType] = path
                     path.moveTo(x, y)
                 } else {
                     path.lineTo(x, y)
+                }
+                if (points == null) {
+                    points = mutableListOf()
+                    pointsMap[chartBeanType] = points
                 }
                 points.add(x)
                 points.add(y)
@@ -167,89 +247,117 @@ class ChartView(context: Context?, attr: AttributeSet?, defStyleAttr: Int) :
     }
 
     override fun onDraw(canvas: Canvas) {
-        if (coordinatePath != null) {
-            canvas.drawPath(coordinatePath!!, coordinatePaint)
-
-            // 绘制y轴刻度
-            coordinateTextPaint.textAlign = Paint.Align.RIGHT
-            for (i in 0..maxYPieceCount) {
-                drawText(canvas,
-                    (i * yPiece).toString(),
-                    offset - 10 + i * yPieceInterval,
-                    offset - 10,
-                    coordinateTextPaint,
-                    90f)
-                canvas.drawPoint(offset + i * yPieceInterval, offset, coordinateTextPaint)
-
-                if (i != 0 && i != maxYPieceCount)
-                    canvas.drawLine(offset + i * yPieceInterval, offset,
-                        offset + i * yPieceInterval, offset + totalHeight, guidelinePaint)
-            }
+        if (axisPath != null) {
+            canvas.drawPath(axisPath!!, axisPaint)
 
             // 绘制x轴刻度
-            coordinateTextPaint.textAlign = Paint.Align.CENTER
-            coordinateTextPaint.textSize = GenericTools.dip2px(context, 15f).toFloat()
+            axisTextPaint.textAlign = Paint.Align.CENTER
+            axisTextPaint.textSize = GenericTools.dip2px(context, axisTextSize).toFloat()
             for (i in 0 until maxXPieceCount - 1) {
-                drawText(canvas,
-                    androidDailyInfoList[i].date,
-                    offset - coordinateTextPaint.textSize / 2 - 20,
-                    offset + xPieceInterval * (i + 1),
-                    coordinateTextPaint,
-                    90f)
-                canvas.drawPoint(offset, offset + xPieceInterval * (i + 1), coordinateTextPaint)
-
-                canvas.drawLine(offset, offset + xPieceInterval * (i + 1),
-                    offset + totalWidth, offset + xPieceInterval * (i + 1), guidelinePaint)
-            }
-
-            // 绘制android点
-            androidPaint.style = Paint.Style.FILL
-            drawText(canvas,
-                "Android",
-                totalWidth,
-                totalHeight,
-                androidPaint,
-                90f)
-            androidPaint.style = Paint.Style.STROKE
-            if (androidNumPath != null) {
-                canvas.drawPath(androidNumPath!!, androidPaint)
-                canvas.drawPoints(androidPoints.toFloatArray(), coordinateTextPaint)
-
-                coordinateTextPaint.textSize = GenericTools.dip2px(context, 10f).toFloat()
-                for (index in androidPoints.indices step 2) {
+                if (isHorizontal) {
                     drawText(canvas,
-                        androidDailyInfoList[index / 2].num.toString(),
-                        androidPoints[index] + 12,
-                        androidPoints[index + 1],
-                        coordinateTextPaint,
+                        chartBeanList[maxXPieceIndex][i].axisInfo,
+                        offset + xPieceInterval * (i + 1),
+                        offset + yAxisLength + axisTextPaint.textSize + textOffset,
+                        axisTextPaint,
+                        0f)
+                    canvas.drawPoint(offset + xPieceInterval * (i + 1),
+                        offset + yAxisLength + arrowOffset,
+                        axisTextPaint)
+                    canvas.drawLine(offset + xPieceInterval * (i + 1), offset,
+                        offset + xPieceInterval * (i + 1), offset + yAxisLength, guidelinePaint)
+                } else {
+                    drawText(canvas,
+                        chartBeanList[maxXPieceIndex][i].axisInfo,
+                        offset - axisTextPaint.textSize - textOffset,
+                        offset + xPieceInterval * (i + 1),
+                        axisTextPaint,
                         90f)
+                    canvas.drawPoint(offset, offset + xPieceInterval * (i + 1), axisTextPaint)
+                    canvas.drawLine(offset, offset + xPieceInterval * (i + 1),
+                        offset + yAxisLength, offset + xPieceInterval * (i + 1), guidelinePaint)
                 }
             }
 
-            // 绘制iOS点
-            iosPaint.style = Paint.Style.FILL
-            drawText(canvas,
-                "iOS",
-                totalWidth - androidPaint.textSize - 30,
-                totalHeight,
-                iosPaint,
-                90f)
-            iosPaint.style = Paint.Style.STROKE
-            if (iosNumPath != null) {
-                canvas.drawPath(iosNumPath!!, iosPaint)
-                canvas.drawPoints(iosPoints.toFloatArray(), coordinateTextPaint)
-
-                coordinateTextPaint.textSize = GenericTools.dip2px(context, 10f).toFloat()
-                for (index in iosPoints.indices step 2) {
+            // 绘制y轴刻度
+            axisTextPaint.textAlign = Paint.Align.RIGHT
+            for (i in 0..maxYPieceCount) {
+                if (isHorizontal) {
                     drawText(canvas,
-                        iosDailyInfoList[index / 2].num.toString(),
-                        iosPoints[index] + 12,
-                        iosPoints[index + 1],
-                        coordinateTextPaint,
+                        (i * yPiece).toString(),
+                        offset - textOffset,
+                        offset + yAxisLength + arrowOffset - i * yPieceInterval + axisTextPaint.textSize / 3,
+                        axisTextPaint,
+                        0f)
+                    canvas.drawPoint(offset,
+                        offset + yAxisLength + arrowOffset - i * yPieceInterval,
+                        axisTextPaint)
+                } else {
+                    drawText(canvas,
+                        (i * yPiece).toString(),
+                        offset + i * yPieceInterval - axisTextPaint.textSize / 3,
+                        offset - textOffset,
+                        axisTextPaint,
                         90f)
+                    canvas.drawPoint(offset + i * yPieceInterval, offset, axisTextPaint)
                 }
+
+                if (i != 0 && i != maxYPieceCount)
+                    if (isHorizontal) {
+                        canvas.drawLine(offset,
+                            offset + arrowOffset + i * yPieceInterval,
+                            offset + xAxisLength,
+                            offset + arrowOffset + i * yPieceInterval,
+                            guidelinePaint)
+                    } else {
+                        canvas.drawLine(offset + i * yPieceInterval, offset,
+                            offset + i * yPieceInterval, offset + xAxisLength, guidelinePaint)
+                    }
             }
 
+            var path: Path?
+            var points: MutableList<Float>?
+            for ((offsetCount, chartBeanType) in chartBeanTypeList.withIndex()) {
+                path = pathMap[chartBeanType]
+                points = pointsMap[chartBeanType]
+
+                linePaint.style = Paint.Style.FILL
+                linePaint.color = Color.parseColor(colorMap[chartBeanType])
+                linePaint.textSize = GenericTools.dip2px(context, lineTextSize).toFloat()
+                if (isHorizontal) {
+                    drawText(canvas,
+                        chartBeanType,
+                        xAxisLength,
+                        offset + (linePaint.textSize + textOffset) * offsetCount,
+                        linePaint,
+                        0f)
+                } else {
+                    drawText(canvas,
+                        chartBeanType,
+                        yAxisLength + offset - (linePaint.textSize + textOffset) * offsetCount,
+                        xAxisLength,
+                        linePaint,
+                        90f)
+                }
+                linePaint.style = Paint.Style.STROKE
+
+                if (path != null) {
+                    canvas.drawPath(path, linePaint)
+                    points?.let {
+                        canvas.drawPoints(it.toFloatArray(), axisTextPaint)
+                        axisTextPaint.textSize =
+                            GenericTools.dip2px(context, lineTextSize).toFloat()
+                        for (index in it.indices step 2) {
+                            drawText(canvas,
+                                chartBeanList[offsetCount][index / 2].num.toString(),
+                                it[index],
+                                it[index + 1] - textOffset,
+                                axisTextPaint,
+                                if (isHorizontal) 0f else 90f)
+                        }
+                    }
+                }
+            }
         } else
             super.onDraw(canvas)
     }
@@ -267,5 +375,25 @@ class ChartView(context: Context?, attr: AttributeSet?, defStyleAttr: Int) :
         canvas.drawText(text, x, y, paint)
         if (angle != 0f)
             canvas.rotate(-angle, x, y)
+    }
+
+    /**
+     * 获取十六进制的颜色代码.例如  "#5A6677"
+     * 分别取R、G、B的随机值，然后加起来即可
+     *
+     * @return String
+     */
+    private fun getRandColor(): String {
+        var r: String
+        var g: String
+        var b: String
+        val random = Random()
+        r = Integer.toHexString(random.nextInt(256)).uppercase(Locale.getDefault())
+        g = Integer.toHexString(random.nextInt(256)).uppercase(Locale.getDefault())
+        b = Integer.toHexString(random.nextInt(256)).uppercase(Locale.getDefault())
+        r = if (r.length == 1) "0$r" else r
+        g = if (g.length == 1) "0$g" else g
+        b = if (b.length == 1) "0$b" else b
+        return "#$r$g$b"
     }
 }
