@@ -1,29 +1,76 @@
 package com.hebao.testkotlin.widget
 
+import android.annotation.SuppressLint
 import android.content.Context
 import android.graphics.*
 import android.util.AttributeSet
+import android.view.GestureDetector
+import android.view.MotionEvent
+import android.view.ScaleGestureDetector
 import android.view.View
+import android.widget.Scroller
 import com.shrimp.base.utils.GenericTools
 import java.util.*
 import kotlin.math.max
+
 
 /**
  * Created by chasing on 2022/3/1.
  * 图表--横屏模式     垂直方向为x轴，水平方向为y轴
  */
 class ChartView(context: Context?, attr: AttributeSet?, defStyleAttr: Int) :
-    View(context, attr, defStyleAttr) {
+    View(context, attr, defStyleAttr), ScaleGestureDetector.OnScaleGestureListener,
+    GestureDetector.OnGestureListener, GestureDetector.OnDoubleTapListener {
+
     constructor(context: Context?, attr: AttributeSet?) : this(context, attr, 0)
     constructor(context: Context?) : this(context, null)
 
     // region 提供外部设置属性
-    private var isHorizontal = false
-    private var offset = 100f
-    private var arrowOffset = 12f
-    private var textOffset = 10f
-    private var axisTextSize = 15f
-    private var lineTextSize = 10f
+    var isScreenVertical = false
+        set(value) {
+            if (field != value) {
+                field = value
+                xAxisLength = yAxisLength.also { yAxisLength = xAxisLength }
+                refresh()
+            }
+        }
+    var offset = 100f
+        set(value) {
+            if (field != value) {
+                xAxisLength = xAxisLength + 2 * field - 2 * value
+                yAxisLength = yAxisLength + 2 * field - 2 * value
+                field = value
+                refresh()
+            }
+        }
+    var arrowOffset = 12f
+        set(value) {
+            if (field != value) {
+                field = value
+                refresh()
+            }
+        }
+    var textOffset = 10f
+        set(value) {
+            if (field != value) {
+                field = value
+                refresh()
+            }
+        }
+    var axisTextSize = 15f
+        set(value) {
+            if (field != value) {
+                field = value
+                refresh()
+            }
+        }
+    var lineTextSize = 10f
+        set(value) {
+            if (field != value) {
+                field = value
+                refresh()
+            }
+        }
     // endregion
 
     private val axisPaint = Paint()
@@ -31,6 +78,7 @@ class ChartView(context: Context?, attr: AttributeSet?, defStyleAttr: Int) :
     private val linePaint = Paint()
     private val guidelinePaint = Paint()
 
+    private var minTextSpace = 100f
     private val chartBeanList = ArrayList<ArrayList<ChartBean>>()
     private val chartBeanTypeList = ArrayList<String>()
     private var xAxisLength = 0f
@@ -44,9 +92,18 @@ class ChartView(context: Context?, attr: AttributeSet?, defStyleAttr: Int) :
 
     private var maxY = 0 //数据中y轴方向包含的最大值
     private var axisPath: Path? = null //坐标轴路径
-    private val pathMap = hashMapOf<String, Path?>()
-    private val pointsMap = hashMapOf<String, MutableList<Float>?>()
-    private val colorMap = hashMapOf<String, String>()
+    private val pathMap = hashMapOf<String, Path?>() //数据线
+    private val pointsMap = hashMapOf<String, MutableList<Float>?>() //数据点
+    private val colorMap = hashMapOf<String, String>() //每条数据线的颜色
+
+    private val scaleGestureDetector: ScaleGestureDetector
+    private val gestureDetector: GestureDetector
+    private val scroller: Scroller
+    private val minScale = 1f
+    private val maxScale = 2f
+    private var scale = 1f
+    private var xOffset = 0f //x轴的偏移量
+    private var yOffset = 0f //y轴的偏移量
 
     init {
         axisPaint.color = Color.BLACK
@@ -57,6 +114,7 @@ class ChartView(context: Context?, attr: AttributeSet?, defStyleAttr: Int) :
         axisTextPaint.isAntiAlias = true
         axisTextPaint.textAlign = Paint.Align.CENTER
         axisTextPaint.strokeWidth = 6f
+        axisTextPaint.textSize = GenericTools.dip2px(context, axisTextSize).toFloat()
 
         linePaint.isAntiAlias = true
         linePaint.style = Paint.Style.STROKE
@@ -67,17 +125,22 @@ class ChartView(context: Context?, attr: AttributeSet?, defStyleAttr: Int) :
         guidelinePaint.isAntiAlias = true
         guidelinePaint.style = Paint.Style.STROKE
         guidelinePaint.pathEffect = DashPathEffect(floatArrayOf(4f, 4f), 0f)
+
+        scaleGestureDetector = ScaleGestureDetector(context, this)
+        gestureDetector = GestureDetector(context, this)
+        scroller = Scroller(context)
     }
 
     override fun onMeasure(widthMeasureSpec: Int, heightMeasureSpec: Int) {
         super.onMeasure(widthMeasureSpec, heightMeasureSpec)
-        if (isHorizontal) {
+        if (isScreenVertical) {
             xAxisLength = measuredWidth - offset * 2
             yAxisLength = measuredHeight - offset * 2
         } else {
             xAxisLength = measuredHeight - offset * 2
             yAxisLength = measuredWidth - offset * 2
         }
+        minTextSpace = axisTextPaint.measureText("12.31")
         refresh()
     }
 
@@ -90,56 +153,23 @@ class ChartView(context: Context?, attr: AttributeSet?, defStyleAttr: Int) :
         refresh()
     }
 
-    fun setHorizontal(horizontal: Boolean) {
-        if (isHorizontal != horizontal) {
-            isHorizontal = horizontal
-            xAxisLength = yAxisLength.also { xAxisLength }
-            refresh()
+    private fun getMaxValue(chartBeanList: List<ChartBean>) {
+        if (chartBeanList.isEmpty()) return
+        for (dailyInfo in chartBeanList) {
+            maxY = max(maxY, dailyInfo.num)
         }
-    }
-
-    fun setOffset(offset: Float) {
-        if (this.offset != offset) {
-            xAxisLength = xAxisLength + 2 * this.offset - 2 * offset
-            yAxisLength = yAxisLength + 2 * this.offset - 2 * offset
-            this.offset = offset
-            refresh()
+        if (chartBeanList.size > maxXPieceCount) {
+            maxXPieceIndex = this.chartBeanList.size - 1
         }
+        maxXPieceCount = max(maxXPieceCount, chartBeanList.size + 1)
     }
+    // endregion
 
-    fun setArrowOffset(arrowOffset: Float) {
-        if (this.arrowOffset != arrowOffset) {
-            this.arrowOffset = arrowOffset
-            refresh()
-        }
-    }
-
-    fun setTextOffset(textOffset: Float) {
-        if (this.textOffset != textOffset) {
-            this.textOffset = textOffset
-            invalidate()
-        }
-    }
-
-    fun setAxisTextSize(axisTextSize: Float) {
-        if (this.axisTextSize != axisTextSize) {
-            this.axisTextSize = axisTextSize
-            invalidate()
-        }
-    }
-
-    fun setLineTextSize(lineTextSize: Float) {
-        if (this.lineTextSize != lineTextSize) {
-            this.lineTextSize = lineTextSize
-            invalidate()
-        }
-    }
-
+    // 刷新全部（坐标轴、数据）
     private fun refresh() {
         if (maxXPieceCount == 0 || xAxisLength == 0f) return
-        pathMap.clear()
-        pointsMap.clear()
 
+        // region 坐标轴信息
         when {
             maxY <= 10 -> {
                 yPiece = 1
@@ -159,7 +189,7 @@ class ChartView(context: Context?, attr: AttributeSet?, defStyleAttr: Int) :
         xPieceInterval = xAxisLength / maxXPieceCount
 
         axisPath = Path()
-        if (isHorizontal) {
+        if (isScreenVertical) {
             axisPath?.moveTo(offset, offset + yAxisLength + arrowOffset)
             axisPath?.lineTo(offset + xAxisLength + arrowOffset, offset + yAxisLength + arrowOffset)
             axisPath?.lineTo(offset + xAxisLength, offset + yAxisLength)
@@ -183,51 +213,36 @@ class ChartView(context: Context?, attr: AttributeSet?, defStyleAttr: Int) :
             axisPath?.moveTo(offset + yAxisLength + arrowOffset, offset)
             axisPath?.lineTo(offset + yAxisLength, offset + arrowOffset)
         }
+        // endregion
 
+        refreshData()
+    }
+
+    // 刷新数据
+    private fun refreshData() {
+        if (maxXPieceCount == 0 || xAxisLength == 0f) return
+        pathMap.clear()
+        pointsMap.clear()
         for (index in chartBeanList.indices) {
             createPath(chartBeanTypeList[index], chartBeanList[index])
         }
         invalidate()
-    }
-    // endregion
-
-    private fun getMaxValue(chartBeanList: List<ChartBean>) {
-        if (chartBeanList.isEmpty()) return
-        for (dailyInfo in chartBeanList) {
-            maxY = max(maxY, dailyInfo.num)
-        }
-        if (chartBeanList.size > maxXPieceCount) {
-            maxXPieceIndex = this.chartBeanList.size - 1
-        }
-        maxXPieceCount = max(maxXPieceCount, chartBeanList.size + 1)
-    }
-
-    private fun getHorizontalYAxis(chartBean: ChartBean): Float {
-        val count = chartBean.num / yPiece
-        val last = chartBean.num % yPiece
-        return yAxisLength + offset  + arrowOffset - (count * yPieceInterval + last * yPieceInterval / yPiece)
-    }
-
-    private fun getVerticalXAxis(chartBean: ChartBean): Float {
-        val count = chartBean.num / yPiece
-        val last = chartBean.num % yPiece
-        return count * yPieceInterval + last * yPieceInterval / yPiece + offset
     }
 
     private fun createPath(chartBeanType: String, chartBeanList: List<ChartBean>) {
         if (chartBeanList.isNotEmpty()) {
             var path = pathMap[chartBeanType]
             var points = pointsMap[chartBeanType]
-            val xOffset = (maxXPieceCount - 1 - chartBeanList.size) * xPieceInterval
+            val xOffset = (maxXPieceCount - 1 - chartBeanList.size) * xPieceInterval * scale
             var x: Float
             var y: Float
             for (index in chartBeanList.indices) {
-                if (isHorizontal) {
-                    x = offset + (index + 1) * xPieceInterval + xOffset
-                    y = getHorizontalYAxis(chartBeanList[index])
+                if (isScreenVertical) {
+                    x = offset + (index + 1) * xPieceInterval * scale + xOffset + this.xOffset
+                    y = getVerticalYAxis(chartBeanList[index]) + this.yOffset
                 } else {
-                    x = getVerticalXAxis(chartBeanList[index])
-                    y = offset + (index + 1) * xPieceInterval + xOffset
+                    x = getHorizontalXAxis(chartBeanList[index]) + this.yOffset
+                    y = offset + (index + 1) * xPieceInterval * scale + xOffset + this.xOffset
                 }
                 if (path == null) {
                     path = Path()
@@ -246,6 +261,18 @@ class ChartView(context: Context?, attr: AttributeSet?, defStyleAttr: Int) :
         }
     }
 
+    private fun getVerticalYAxis(chartBean: ChartBean): Float {
+        val count = chartBean.num / yPiece
+        val last = chartBean.num % yPiece
+        return yAxisLength + offset + arrowOffset - (count * yPieceInterval + last * yPieceInterval / yPiece) * scale
+    }
+
+    private fun getHorizontalXAxis(chartBean: ChartBean): Float {
+        val count = chartBean.num / yPiece
+        val last = chartBean.num % yPiece
+        return offset + (count * yPieceInterval + last * yPieceInterval / yPiece) * scale
+    }
+
     override fun onDraw(canvas: Canvas) {
         if (axisPath != null) {
             canvas.drawPath(axisPath!!, axisPaint)
@@ -253,65 +280,94 @@ class ChartView(context: Context?, attr: AttributeSet?, defStyleAttr: Int) :
             // 绘制x轴刻度
             axisTextPaint.textAlign = Paint.Align.CENTER
             axisTextPaint.textSize = GenericTools.dip2px(context, axisTextSize).toFloat()
-            for (i in 0 until maxXPieceCount - 1) {
-                if (isHorizontal) {
-                    drawText(canvas,
-                        chartBeanList[maxXPieceIndex][i].axisInfo,
-                        offset + xPieceInterval * (i + 1),
-                        offset + yAxisLength + axisTextPaint.textSize + textOffset,
-                        axisTextPaint,
-                        0f)
-                    canvas.drawPoint(offset + xPieceInterval * (i + 1),
-                        offset + yAxisLength + arrowOffset,
-                        axisTextPaint)
-                    canvas.drawLine(offset + xPieceInterval * (i + 1), offset,
-                        offset + xPieceInterval * (i + 1), offset + yAxisLength, guidelinePaint)
+            val stepCount: Int = when {
+                xPieceInterval * scale <= minTextSpace -> (minTextSpace / (xPieceInterval * scale)).toInt() + 1
+                else -> 1
+            }
+            for (i in 0 until maxXPieceCount - 1 step stepCount) {
+                if (isScreenVertical) {
+                    val x = offset + xPieceInterval * (i + 1) * scale + xOffset
+                    if (x >= offset) {
+                        drawText(canvas,
+                            chartBeanList[maxXPieceIndex][i].axisInfo,
+                            x,
+                            offset + yAxisLength + axisTextPaint.textSize + textOffset,
+                            axisTextPaint,
+                            0f)
+                        canvas.drawPoint(x,
+                            offset + yAxisLength + arrowOffset,
+                            axisTextPaint)
+                        canvas.drawLine(x,
+                            offset,
+                            x,
+                            offset + yAxisLength,
+                            guidelinePaint)
+                    }
                 } else {
-                    drawText(canvas,
-                        chartBeanList[maxXPieceIndex][i].axisInfo,
-                        offset - axisTextPaint.textSize - textOffset,
-                        offset + xPieceInterval * (i + 1),
-                        axisTextPaint,
-                        90f)
-                    canvas.drawPoint(offset, offset + xPieceInterval * (i + 1), axisTextPaint)
-                    canvas.drawLine(offset, offset + xPieceInterval * (i + 1),
-                        offset + yAxisLength, offset + xPieceInterval * (i + 1), guidelinePaint)
+                    val y = offset + xPieceInterval * (i + 1) * scale + xOffset
+                    if (y >= offset) {
+                        drawText(canvas,
+                            chartBeanList[maxXPieceIndex][i].axisInfo,
+                            offset - axisTextPaint.textSize - textOffset,
+                            y,
+                            axisTextPaint,
+                            90f)
+                        canvas.drawPoint(offset,
+                            y,
+                            axisTextPaint)
+                        canvas.drawLine(offset,
+                            y,
+                            offset + yAxisLength,
+                            y,
+                            guidelinePaint)
+                    }
                 }
             }
 
             // 绘制y轴刻度
             axisTextPaint.textAlign = Paint.Align.RIGHT
             for (i in 0..maxYPieceCount) {
-                if (isHorizontal) {
-                    drawText(canvas,
-                        (i * yPiece).toString(),
-                        offset - textOffset,
-                        offset + yAxisLength + arrowOffset - i * yPieceInterval + axisTextPaint.textSize / 3,
-                        axisTextPaint,
-                        0f)
-                    canvas.drawPoint(offset,
-                        offset + yAxisLength + arrowOffset - i * yPieceInterval,
-                        axisTextPaint)
+                if (isScreenVertical) {
+                    val y = offset + yAxisLength + arrowOffset - i * yPieceInterval * scale + yOffset
+                    if (y <= offset + yAxisLength + arrowOffset) {
+                        drawText(canvas,
+                            (i * yPiece).toString(),
+                            offset - textOffset,
+                            y + axisTextPaint.textSize / 3,
+                            axisTextPaint,
+                            0f)
+                        canvas.drawPoint(offset,
+                            y,
+                            axisTextPaint)
+                    }
                 } else {
-                    drawText(canvas,
-                        (i * yPiece).toString(),
-                        offset + i * yPieceInterval - axisTextPaint.textSize / 3,
-                        offset - textOffset,
-                        axisTextPaint,
-                        90f)
-                    canvas.drawPoint(offset + i * yPieceInterval, offset, axisTextPaint)
+                    val x = offset + i * yPieceInterval * scale + yOffset
+                    if (x >= offset) {
+                        drawText(canvas,
+                            (i * yPiece).toString(),
+                            x - axisTextPaint.textSize / 3,
+                            offset - textOffset,
+                            axisTextPaint,
+                            90f)
+                        canvas.drawPoint(x,
+                            offset,
+                            axisTextPaint)
+                    }
                 }
 
                 if (i != 0 && i != maxYPieceCount)
-                    if (isHorizontal) {
+                    if (isScreenVertical) {
                         canvas.drawLine(offset,
-                            offset + arrowOffset + i * yPieceInterval,
+                            offset + yAxisLength + arrowOffset - i * yPieceInterval * scale + yOffset,
                             offset + xAxisLength,
-                            offset + arrowOffset + i * yPieceInterval,
+                            offset + yAxisLength + arrowOffset - i * yPieceInterval * scale + yOffset,
                             guidelinePaint)
                     } else {
-                        canvas.drawLine(offset + i * yPieceInterval, offset,
-                            offset + i * yPieceInterval, offset + xAxisLength, guidelinePaint)
+                        canvas.drawLine(offset + i * yPieceInterval * scale + yOffset,
+                            offset,
+                            offset + i * yPieceInterval * scale + yOffset,
+                            offset + xAxisLength,
+                            guidelinePaint)
                     }
             }
 
@@ -324,10 +380,10 @@ class ChartView(context: Context?, attr: AttributeSet?, defStyleAttr: Int) :
                 linePaint.style = Paint.Style.FILL
                 linePaint.color = Color.parseColor(colorMap[chartBeanType])
                 linePaint.textSize = GenericTools.dip2px(context, lineTextSize).toFloat()
-                if (isHorizontal) {
+                if (isScreenVertical) {
                     drawText(canvas,
                         chartBeanType,
-                        xAxisLength,
+                        xAxisLength + offset,
                         offset + (linePaint.textSize + textOffset) * offsetCount,
                         linePaint,
                         0f)
@@ -335,25 +391,29 @@ class ChartView(context: Context?, attr: AttributeSet?, defStyleAttr: Int) :
                     drawText(canvas,
                         chartBeanType,
                         yAxisLength + offset - (linePaint.textSize + textOffset) * offsetCount,
-                        xAxisLength,
+                        xAxisLength + offset,
                         linePaint,
                         90f)
                 }
                 linePaint.style = Paint.Style.STROKE
 
                 if (path != null) {
+                    // 连线
                     canvas.drawPath(path, linePaint)
                     points?.let {
+                        axisTextPaint.textAlign = Paint.Align.CENTER
+                        // 画点
                         canvas.drawPoints(it.toFloatArray(), axisTextPaint)
                         axisTextPaint.textSize =
                             GenericTools.dip2px(context, lineTextSize).toFloat()
+                        // 画字
                         for (index in it.indices step 2) {
                             drawText(canvas,
                                 chartBeanList[offsetCount][index / 2].num.toString(),
                                 it[index],
                                 it[index + 1] - textOffset,
                                 axisTextPaint,
-                                if (isHorizontal) 0f else 90f)
+                                if (isScreenVertical) 0f else 90f)
                         }
                     }
                 }
@@ -395,5 +455,176 @@ class ChartView(context: Context?, attr: AttributeSet?, defStyleAttr: Int) :
         g = if (g.length == 1) "0$g" else g
         b = if (b.length == 1) "0$b" else b
         return "#$r$g$b"
+    }
+
+    @SuppressLint("ClickableViewAccessibility")
+    override fun onTouchEvent(event: MotionEvent?): Boolean {
+        scaleGestureDetector.onTouchEvent(event)
+        gestureDetector.onTouchEvent(event)
+        return true
+    }
+
+    private var isScaleGesture = false
+
+    override fun onScale(detector: ScaleGestureDetector): Boolean {
+        isScaleGesture = true
+        val preScale = scale
+        scale *= detector.scaleFactor
+        scale = when {
+            scale <= minScale -> minScale
+            scale >= maxScale -> maxScale
+            else -> scale
+        }
+        if (preScale != scale)
+            refreshData()
+        return true
+    }
+
+    override fun onScaleBegin(detector: ScaleGestureDetector): Boolean = true
+
+    override fun onScaleEnd(detector: ScaleGestureDetector) {
+        isScaleGesture = false
+    }
+
+    override fun onDown(e: MotionEvent?): Boolean {
+        scroller.forceFinished(true)
+        return true
+    }
+
+    override fun onShowPress(e: MotionEvent?) {
+    }
+
+    override fun onSingleTapUp(e: MotionEvent?): Boolean = true
+
+    override fun onScroll(
+        e1: MotionEvent?,
+        e2: MotionEvent?,
+        distanceX: Float,
+        distanceY: Float,
+    ): Boolean {
+        if (!isScaleGesture) {
+            if (isScreenVertical) {
+                xOffset -= distanceX
+                yOffset -= distanceY
+            } else {
+                yOffset -= distanceX
+                xOffset -= distanceY
+            }
+            checkOffset()
+            refreshData()
+        }
+        return true
+    }
+
+    private fun checkOffset() {
+        if (isScreenVertical) {
+            if (xOffset >= 0) xOffset = 0f
+            else {
+                val scrollX = xAxisLength * (scale - 1)
+                if (scrollX > 0) {
+                    if (-xOffset >= scrollX)
+                        xOffset = -scrollX
+                } else
+                    xOffset = 0f
+            }
+
+            if (yOffset <= 0) yOffset = 0f
+            else {
+                val scrollY = yAxisLength * (scale - 1)
+                if (scrollY > 0) {
+                    if (yOffset >= scrollY)
+                        yOffset = scrollY
+                } else
+                    yOffset = 0f
+            }
+        } else {
+            if (xOffset >= 0) xOffset = 0f
+            else {
+                val scrollX = xAxisLength * (scale - 1)
+                if (scrollX > 0) {
+                    if (-xOffset >= scrollX)
+                        xOffset = -scrollX
+                } else
+                    xOffset = 0f
+            }
+
+            if (yOffset >= 0) yOffset = 0f
+            else {
+                val scrollY = yAxisLength * (scale - 1)
+                if (scrollY > 0) {
+                    if (-yOffset >= scrollY)
+                        yOffset = -scrollY
+                } else
+                    yOffset = 0f
+            }
+        }
+    }
+
+    override fun onLongPress(e: MotionEvent?) {
+    }
+
+    override fun onFling(
+        e1: MotionEvent,
+        e2: MotionEvent,
+        velocityX: Float,
+        velocityY: Float,
+    ): Boolean {
+        if (!isScaleGesture) {
+            val scrollX = xAxisLength * (scale - 1)
+            if (scrollX > 0) {
+                if (isScreenVertical) {
+                    val scrollY = yAxisLength * (scale - 1)
+                    scroller.fling(0, 0, velocityX.toInt(), velocityY.toInt(),
+                        xOffset.toInt(), (scrollX + xOffset).toInt(),
+                        (-yOffset).toInt(), (scrollY - yOffset).toInt())
+                } else {
+                    val scrollY = yAxisLength * (scale - 1)
+                    scroller.fling(0, 0, velocityX.toInt(), velocityY.toInt(),
+                        yOffset.toInt(), (scrollY + yOffset).toInt(),
+                        xOffset.toInt(), (scrollX + xOffset).toInt())
+                }
+            }
+        }
+        return true
+    }
+
+    override fun onSingleTapConfirmed(e: MotionEvent?): Boolean = true
+
+    override fun onDoubleTap(e: MotionEvent?): Boolean {
+        scale = when {
+            scale == maxScale -> {
+                xOffset = 0f
+                yOffset = 0f
+                1f
+            }
+            scale >= maxScale / 2 -> maxScale
+            else -> scale * 2
+        }
+        refreshData()
+        return true
+    }
+
+    override fun onDoubleTapEvent(e: MotionEvent?): Boolean = true
+
+    private var preCurrX = 0
+    private var preCurrY = 0
+    override fun computeScroll() {
+        super.computeScroll()
+        if (scroller.computeScrollOffset()) {
+            if (isScreenVertical){
+                xOffset += scroller.currX - preCurrX
+                yOffset += scroller.currY - preCurrY
+            } else {
+                yOffset += scroller.currX - preCurrX
+                xOffset += scroller.currY - preCurrY
+            }
+            checkOffset()
+            refreshData()
+            preCurrX = scroller.currX
+            preCurrY = scroller.currY
+        } else {
+            preCurrX = 0
+            preCurrY = 0
+        }
     }
 }
