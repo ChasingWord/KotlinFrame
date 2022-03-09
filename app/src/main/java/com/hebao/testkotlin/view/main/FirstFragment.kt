@@ -29,7 +29,7 @@ class FirstFragment : Fragment(), OnRefreshListener {
 
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
-        savedInstanceState: Bundle?
+        savedInstanceState: Bundle?,
     ): View {
 
         _binding = FragmentFirstBinding.inflate(inflater, container, false)
@@ -51,7 +51,7 @@ class FirstFragment : Fragment(), OnRefreshListener {
         binding.textviewSecond.setOnClickListener {
             TestDatastoreActivity.start(requireContext())
         }
-        binding.textviewMeituan.setOnClickListener{
+        binding.textviewMeituan.setOnClickListener {
             MeiTuanActivity.start(requireContext())
         }
 

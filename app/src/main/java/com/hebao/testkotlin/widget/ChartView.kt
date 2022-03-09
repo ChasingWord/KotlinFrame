@@ -17,6 +17,7 @@ import kotlin.math.max
 /**
  * Created by chasing on 2022/3/1.
  * 图表--横屏模式     垂直方向为x轴，水平方向为y轴
+ * 暂未仅支持Y轴值大于1的
  */
 class ChartView(context: Context?, attr: AttributeSet?, defStyleAttr: Int) :
     View(context, attr, defStyleAttr), ScaleGestureDetector.OnScaleGestureListener,
@@ -26,6 +27,7 @@ class ChartView(context: Context?, attr: AttributeSet?, defStyleAttr: Int) :
     constructor(context: Context?) : this(context, null)
 
     // region 提供外部设置属性
+    // 屏幕方向是否为垂直方向
     var isScreenVertical = false
         set(value) {
             if (field != value) {
@@ -34,6 +36,7 @@ class ChartView(context: Context?, attr: AttributeSet?, defStyleAttr: Int) :
                 refresh()
             }
         }
+    // 整体坐标轴偏移量
     var offset = 100f
         set(value) {
             if (field != value) {
@@ -43,6 +46,7 @@ class ChartView(context: Context?, attr: AttributeSet?, defStyleAttr: Int) :
                 refresh()
             }
         }
+    // 坐标轴箭头偏移量
     var arrowOffset = 12f
         set(value) {
             if (field != value) {
@@ -50,6 +54,7 @@ class ChartView(context: Context?, attr: AttributeSet?, defStyleAttr: Int) :
                 refresh()
             }
         }
+    // 文本与坐标轴偏移量
     var textOffset = 10f
         set(value) {
             if (field != value) {
@@ -57,6 +62,7 @@ class ChartView(context: Context?, attr: AttributeSet?, defStyleAttr: Int) :
                 refresh()
             }
         }
+    // 坐标轴字体大小
     var axisTextSize = 15f
         set(value) {
             if (field != value) {
@@ -64,7 +70,16 @@ class ChartView(context: Context?, attr: AttributeSet?, defStyleAttr: Int) :
                 refresh()
             }
         }
+    // 线上数据文本字体大小
     var lineTextSize = 10f
+        set(value) {
+            if (field != value) {
+                field = value
+                refresh()
+            }
+        }
+    // 线对应的类型文本字体大小
+    var lineTypeTextSize = 12f
         set(value) {
             if (field != value) {
                 field = value
@@ -140,28 +155,34 @@ class ChartView(context: Context?, attr: AttributeSet?, defStyleAttr: Int) :
             xAxisLength = measuredHeight - offset * 2
             yAxisLength = measuredWidth - offset * 2
         }
-        minTextSpace = axisTextPaint.measureText("12.31")
         refresh()
     }
 
     // region 外部调用方法
     fun addChartBeanList(chartBeanType: String, chartBeanList: ArrayList<ChartBean>) {
         this.chartBeanTypeList.add(chartBeanType)
-        this.chartBeanList.add(chartBeanList)
-        getMaxValue(chartBeanList)
+        this.chartBeanList.add(ArrayList(chartBeanList))
+        checkMaxValue(chartBeanList)
         colorMap[chartBeanType] = getRandColor()
         refresh()
     }
 
-    private fun getMaxValue(chartBeanList: List<ChartBean>) {
+    private fun checkMaxValue(chartBeanList: List<ChartBean>) {
         if (chartBeanList.isEmpty()) return
+        var maxXTextLength = ""
         for (dailyInfo in chartBeanList) {
             maxY = max(maxY, dailyInfo.num)
+            maxXTextLength =
+                if (dailyInfo.axisInfo.length > maxXTextLength.length) dailyInfo.axisInfo
+                else maxXTextLength
         }
         if (chartBeanList.size > maxXPieceCount) {
             maxXPieceIndex = this.chartBeanList.size - 1
         }
         maxXPieceCount = max(maxXPieceCount, chartBeanList.size + 1)
+
+        minTextSpace = axisTextPaint.measureText(maxXTextLength + "占")
+        offset = axisTextPaint.measureText((maxY * 100).toString())
     }
     // endregion
 
@@ -170,21 +191,21 @@ class ChartView(context: Context?, attr: AttributeSet?, defStyleAttr: Int) :
         if (maxXPieceCount == 0 || xAxisLength == 0f) return
 
         // region 坐标轴信息
-        when {
-            maxY <= 10 -> {
-                yPiece = 1
-            }
-            maxY <= 100 -> {
-                yPiece = 10
-            }
-            maxY <= 1000 -> {
-                yPiece = 100
-            }
-            maxY <= 10000 -> {
-                yPiece = 1000
+        var digits = 0 //位数
+        var tempMaxY = maxY
+        while (tempMaxY > 1) {
+            digits++
+            tempMaxY /= 10
+        }
+        if (digits > 0) { // 位数大于0则表明maxY大于1
+            yPiece = 1
+            while (digits > 1) {
+                yPiece *= 10
+                digits--
             }
         }
-        maxYPieceCount = maxY / yPiece + 1
+
+        maxYPieceCount = (maxY / yPiece + 1)
         yPieceInterval = yAxisLength / maxYPieceCount
         xPieceInterval = xAxisLength / maxXPieceCount
 
@@ -224,12 +245,13 @@ class ChartView(context: Context?, attr: AttributeSet?, defStyleAttr: Int) :
         pathMap.clear()
         pointsMap.clear()
         for (index in chartBeanList.indices) {
-            createPath(chartBeanTypeList[index], chartBeanList[index])
+            createPathAndPoints(chartBeanTypeList[index], chartBeanList[index])
         }
         invalidate()
     }
 
-    private fun createPath(chartBeanType: String, chartBeanList: List<ChartBean>) {
+    // 创建数据线path及数据点point
+    private fun createPathAndPoints(chartBeanType: String, chartBeanList: List<ChartBean>) {
         if (chartBeanList.isNotEmpty()) {
             var path = pathMap[chartBeanType]
             var points = pointsMap[chartBeanType]
@@ -275,9 +297,10 @@ class ChartView(context: Context?, attr: AttributeSet?, defStyleAttr: Int) :
 
     override fun onDraw(canvas: Canvas) {
         if (axisPath != null) {
+            // 绘制坐标轴
             canvas.drawPath(axisPath!!, axisPaint)
 
-            // 绘制x轴刻度
+            // region 绘制x轴刻度
             axisTextPaint.textAlign = Paint.Align.CENTER
             axisTextPaint.textSize = GenericTools.dip2px(context, axisTextSize).toFloat()
             val stepCount: Int = when {
@@ -323,12 +346,14 @@ class ChartView(context: Context?, attr: AttributeSet?, defStyleAttr: Int) :
                     }
                 }
             }
+            // endregion
 
-            // 绘制y轴刻度
+            // region 绘制y轴刻度
             axisTextPaint.textAlign = Paint.Align.RIGHT
             for (i in 0..maxYPieceCount) {
                 if (isScreenVertical) {
-                    val y = offset + yAxisLength + arrowOffset - i * yPieceInterval * scale + yOffset
+                    val y =
+                        offset + yAxisLength + arrowOffset - i * yPieceInterval * scale + yOffset
                     if (y <= offset + yAxisLength + arrowOffset) {
                         drawText(canvas,
                             (i * yPiece).toString(),
@@ -370,16 +395,19 @@ class ChartView(context: Context?, attr: AttributeSet?, defStyleAttr: Int) :
                             guidelinePaint)
                     }
             }
+            // endregion
 
+            // region 绘制数据点及数据线
             var path: Path?
             var points: MutableList<Float>?
             for ((offsetCount, chartBeanType) in chartBeanTypeList.withIndex()) {
                 path = pathMap[chartBeanType]
                 points = pointsMap[chartBeanType]
 
+                // 绘制每条线对应的类型文本
                 linePaint.style = Paint.Style.FILL
                 linePaint.color = Color.parseColor(colorMap[chartBeanType])
-                linePaint.textSize = GenericTools.dip2px(context, lineTextSize).toFloat()
+                linePaint.textSize = GenericTools.dip2px(context, lineTypeTextSize).toFloat()
                 if (isScreenVertical) {
                     drawText(canvas,
                         chartBeanType,
@@ -395,9 +423,9 @@ class ChartView(context: Context?, attr: AttributeSet?, defStyleAttr: Int) :
                         linePaint,
                         90f)
                 }
-                linePaint.style = Paint.Style.STROKE
 
                 if (path != null) {
+                    linePaint.style = Paint.Style.STROKE
                     // 连线
                     canvas.drawPath(path, linePaint)
                     points?.let {
@@ -418,10 +446,12 @@ class ChartView(context: Context?, attr: AttributeSet?, defStyleAttr: Int) :
                     }
                 }
             }
+            // endregion
         } else
             super.onDraw(canvas)
     }
 
+    // 绘制文本----改变字体旋转方向angle
     private fun drawText(
         canvas: Canvas,
         text: String,
@@ -611,7 +641,7 @@ class ChartView(context: Context?, attr: AttributeSet?, defStyleAttr: Int) :
     override fun computeScroll() {
         super.computeScroll()
         if (scroller.computeScrollOffset()) {
-            if (isScreenVertical){
+            if (isScreenVertical) {
                 xOffset += scroller.currX - preCurrX
                 yOffset += scroller.currY - preCurrY
             } else {

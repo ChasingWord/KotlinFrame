@@ -41,7 +41,7 @@ class ChartActivity : BaseActivity<ChartViewModel, ActivityChartBinding>() {
         android.add(daily)
         daily = ChartBean("2.28", 521)
         android.add(daily)
-        daily = ChartBean("3.8", 574)
+        daily = ChartBean("3.7", 574)
         android.add(daily)
 
         val ios = ArrayList<ChartBean>()
@@ -57,13 +57,13 @@ class ChartActivity : BaseActivity<ChartViewModel, ActivityChartBinding>() {
         ios.add(daily)
         daily = ChartBean("2.28", 222)
         ios.add(daily)
-        daily = ChartBean("3.8", 231)
+        daily = ChartBean("3.7", 231)
         ios.add(daily)
 
         dataBinding.chart.addChartBeanList("android", android)
         dataBinding.chart.addChartBeanList("ios", ios)
         dataBinding.chart.isScreenVertical = true
-        dataBinding.button.setOnClickListener{
+        dataBinding.button.setOnClickListener {
             dataBinding.chart.isScreenVertical = !dataBinding.chart.isScreenVertical
         }
 
@@ -72,11 +72,6 @@ class ChartActivity : BaseActivity<ChartViewModel, ActivityChartBinding>() {
         val a = mutableListOf<Int>()
         a.add(1)
 
-    }
-
-    fun getArrY(): IntArray {
-        val a = mutableListOf<Int>()
-        return a.toIntArray()
     }
 
     override fun initDataObserve() {
