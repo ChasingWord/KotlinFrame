@@ -1,6 +1,5 @@
 package com.shrimp.base.widgets.dialog
 
-import android.R
 import android.annotation.SuppressLint
 import android.content.DialogInterface
 import android.os.Bundle
@@ -9,15 +8,14 @@ import android.view.View
 import androidx.fragment.app.DialogFragment
 import androidx.fragment.app.FragmentManager
 import androidx.fragment.app.FragmentTransaction
+import com.shrimp.base.R
 
 /**
  * Created by chasing on 2021/10/26.
  */
-open abstract class BaseDialog : DialogFragment() {
+abstract class BaseDialog : DialogFragment() {
     protected var mContentView: View? = null
     private var dismissListener: DismissListener? = null
-
-    open fun BaseDialog() {}
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)

@@ -17,15 +17,15 @@ object GenericTools {
     /**
      * 返回屏幕高度（不包含虚拟导航栏）
      */
-    fun getScreenHeight(activity: Activity?): Int {
-        return activity?.resources?.displayMetrics?.heightPixels ?: 0
+    fun getScreenHeight(context: Context?): Int {
+        return context?.resources?.displayMetrics?.heightPixels ?: 0
     }
 
     /**
      * 返回屏幕宽度
      */
-    fun getScreenWidth(activity: Activity?): Int {
-        return activity?.resources?.displayMetrics?.widthPixels ?: 0
+    fun getScreenWidth(context: Context?): Int {
+        return context?.resources?.displayMetrics?.widthPixels ?: 0
     }
 
     /**
