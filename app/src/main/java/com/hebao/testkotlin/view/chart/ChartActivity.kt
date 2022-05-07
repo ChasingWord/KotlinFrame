@@ -4,8 +4,6 @@ import android.content.Context
 import com.hebao.testkotlin.databinding.ActivityChartBinding
 import com.hebao.testkotlin.widget.ChartBean
 import com.shrimp.base.view.BaseActivity
-import java.util.*
-import kotlin.collections.ArrayList
 
 /**
  * Created by chasing on 2022/3/1.
@@ -55,6 +53,10 @@ class ChartActivity : BaseActivity<ChartViewModel, ActivityChartBinding>() {
         android.add(daily)
         daily = ChartBean("4.11", 535)
         android.add(daily)
+        daily = ChartBean("4.18", 384)
+        android.add(daily)
+        daily = ChartBean("4.25", 300)
+        android.add(daily)
 
         val ios = ArrayList<ChartBean>()
         daily = ChartBean("1.19", 199)
@@ -80,6 +82,10 @@ class ChartActivity : BaseActivity<ChartViewModel, ActivityChartBinding>() {
         daily = ChartBean("4.6", 213)
         ios.add(daily)
         daily = ChartBean("4.11", 242)
+        ios.add(daily)
+        daily = ChartBean("4.18", 210)
+        ios.add(daily)
+        daily = ChartBean("4.25", 198)
         ios.add(daily)
 
         dataBinding.chart.addChartBeanList("android", android)
