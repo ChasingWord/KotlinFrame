@@ -57,6 +57,10 @@ class ChartActivity : BaseActivity<ChartViewModel, ActivityChartBinding>() {
         android.add(daily)
         daily = ChartBean("4.25", 300)
         android.add(daily)
+        daily = ChartBean("5.09", 318)
+        android.add(daily)
+        daily = ChartBean("5.16", 264)
+        android.add(daily)
 
         val ios = ArrayList<ChartBean>()
         daily = ChartBean("1.19", 199)
@@ -86,6 +90,10 @@ class ChartActivity : BaseActivity<ChartViewModel, ActivityChartBinding>() {
         daily = ChartBean("4.18", 210)
         ios.add(daily)
         daily = ChartBean("4.25", 198)
+        ios.add(daily)
+        daily = ChartBean("5.09", 227)
+        ios.add(daily)
+        daily = ChartBean("5.16", 243)
         ios.add(daily)
 
         dataBinding.chart.addChartBeanList("android", android)
