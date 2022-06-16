@@ -34,6 +34,7 @@ android {
         viewBinding true
         dataBinding true
     }
+    namespace 'com.shrimp.base'
 }
 
 dependencies {
@@ -52,6 +53,7 @@ dependencies {
     api depend["coil"]
     api depend["coilGif"]
     api depend["coilVideo"]
+    api depend["coilSvg"]
 
     api depend["lifecycle"]
     api depend["lifecycleVM"]

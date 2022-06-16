@@ -6,15 +6,14 @@ import coil.ImageLoader
 import coil.ImageLoaderFactory
 import coil.decode.GifDecoder
 import coil.decode.ImageDecoderDecoder
+import coil.decode.SvgDecoder
 import coil.decode.VideoFrameDecoder
-import coil.fetch.VideoFrameFileFetcher
-import coil.fetch.VideoFrameUriFetcher
-import coil.util.CoilUtils
+import coil.disk.DiskCache
+import coil.memory.MemoryCache
 import com.scwang.smart.refresh.layout.SmartRefreshLayout
+import com.shrimp.base.utils.CrashErrorHandler
 import com.shrimp.base.widgets.refresh.SmartRefreshFooter
 import com.shrimp.base.widgets.refresh.SmartRefreshHeader
-import okhttp3.OkHttpClient
-import com.shrimp.base.utils.CrashErrorHandler
 
 /**
  * Created by chasing on 2021/11/3.
@@ -29,22 +28,21 @@ class MyApp : Application(), ImageLoaderFactory {
 
     override fun newImageLoader(): ImageLoader {
         return ImageLoader.Builder(this)
-            .availableMemoryPercentage(0.25)
+            .memoryCache { MemoryCache.Builder(this).maxSizePercent(0.25).build() }
             .crossfade(true)
-            .okHttpClient {
-                OkHttpClient.Builder()
-                    .cache(CoilUtils.createDefaultCache(this))
+            .diskCache {
+                DiskCache.Builder()
+                    .directory(applicationContext.cacheDir.resolve("image_cache"))
                     .build()
             }
-            .componentRegistry {
+            .components {
                 if (SDK_INT >= 28) {
-                    add(ImageDecoderDecoder(this@MyApp))
+                    add(ImageDecoderDecoder.Factory())
                 } else {
-                    add(GifDecoder())
+                    add(GifDecoder.Factory())
                 }
-                add(VideoFrameFileFetcher(this@MyApp))
-                add(VideoFrameUriFetcher(this@MyApp))
-                add(VideoFrameDecoder(this@MyApp))
+                add(VideoFrameDecoder.Factory())
+                add(SvgDecoder.Factory())
             }
             .build()
     }
