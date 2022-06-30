@@ -18,7 +18,7 @@ import com.shrimp.base.widgets.dialog.ProgressDialog
  * Created by chasing on 2021/11/12.
  * 因为系统封装的LifecycleObserve只有
  */
-abstract class BaseFragment<VM : BaseFragmentViewModel, B : ViewDataBinding> : Fragment() {
+abstract class BaseFragment<VM : BaseViewModel, B : ViewDataBinding> : Fragment() {
 
     protected var oneClickUtil = OneClickUtil()
 
@@ -45,7 +45,7 @@ abstract class BaseFragment<VM : BaseFragmentViewModel, B : ViewDataBinding> : F
     override fun onCreateView(
         inflater: LayoutInflater,
         container: ViewGroup?,
-        savedInstanceState: Bundle?
+        savedInstanceState: Bundle?,
     ): View? {
         dataBinding = inflateDataBinding(inflater, container)
         dataBinding.lifecycleOwner = this
@@ -59,7 +59,7 @@ abstract class BaseFragment<VM : BaseFragmentViewModel, B : ViewDataBinding> : F
             else
                 hideLoading()
         }
-        viewModel.handleBundle(arguments)
+        arguments?.run { viewModel.handleBundle(this) }
         return dataBinding.root
     }
 
@@ -75,7 +75,7 @@ abstract class BaseFragment<VM : BaseFragmentViewModel, B : ViewDataBinding> : F
         initView()
         initDataObserve()
 
-        viewModel.loadingData()
+        viewModel.loadData()
     }
 
     /**

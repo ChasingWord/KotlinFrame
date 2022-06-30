@@ -17,7 +17,6 @@ object FixMemLeakUtil {
             return
         }
         val imm = context.getSystemService(Context.INPUT_METHOD_SERVICE) as InputMethodManager
-            ?: return
         val arr = arrayOf("mLastSrvView")
         for (param in arr) {
             try {

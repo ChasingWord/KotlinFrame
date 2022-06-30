@@ -195,7 +195,7 @@ public class SlidingTabLayout extends HorizontalScrollView implements ViewPager.
 
         if (!height.equals(ViewGroup.LayoutParams.MATCH_PARENT + "") && !height.equals(ViewGroup.LayoutParams.WRAP_CONTENT + "")) {
             int[] systemAttrs = {android.R.attr.layout_height};
-            TypedArray a = context.obtainStyledAttributes(attrs, systemAttrs);
+            @SuppressLint("ResourceType") TypedArray a = context.obtainStyledAttributes(attrs, systemAttrs);
             mHeight = a.getDimensionPixelSize(0, ViewGroup.LayoutParams.WRAP_CONTENT);
             a.recycle();
         }

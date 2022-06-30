@@ -163,6 +163,7 @@ abstract class FlexibleDividerDecoration(builder: Builder) : RecyclerView.ItemDe
                         paint!!
                     )
                 }
+                else -> {}
             }
         }
     }

@@ -37,7 +37,7 @@ class MainActivity : AppCompatActivity() {
 
         StatusBarUtil.setColorDiff(
             this,
-            ContextCompat.getColor(this, R.color.design_default_color_error)
+            ContextCompat.getColor(this, R.color.purple_200)
         )
 
         setSupportActionBar(binding.toolbar)

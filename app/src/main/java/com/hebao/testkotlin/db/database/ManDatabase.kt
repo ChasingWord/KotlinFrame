@@ -6,6 +6,7 @@ import androidx.room.Room
 import androidx.room.RoomDatabase
 import androidx.room.migration.Migration
 import androidx.sqlite.db.SupportSQLiteDatabase
+import com.hebao.testkotlin.db.base.DB_NAME
 import com.hebao.testkotlin.db.dao.ManDao
 import com.hebao.testkotlin.db.entity.Man
 
@@ -25,18 +26,17 @@ abstract class ManDatabase : RoomDatabase() {
             if (instance == null) {
                 synchronized(ManDatabase::class) {
                     if (instance == null) {
-                        instance = Room.databaseBuilder(
-                            applicationContext, ManDatabase::class.java,
-                                "self.db"
-                            )
-                                .addCallback(CreatedCallBack)
-                                .addMigrations(*MIGRATION_LIST)
-                                .build()
-                        }
+                        instance = Room.databaseBuilder(applicationContext,
+                            ManDatabase::class.java,
+                            DB_NAME)
+                            .addCallback(CreatedCallBack)
+                            .addMigrations(*MIGRATION_LIST)
+                            .build()
                     }
                 }
-                return instance!!.dao
             }
+            return instance!!.dao
+        }
 
         private object CreatedCallBack : RoomDatabase.Callback() {
             override fun onCreate(db: SupportSQLiteDatabase) {
@@ -47,6 +47,7 @@ abstract class ManDatabase : RoomDatabase() {
             }
         }
 
+        // 版本1升级到版本2时执行：
         private object Migration1To2 : Migration(1, 2) {
             override fun migrate(database: SupportSQLiteDatabase) {
                 // 数据库的升级语句

@@ -6,6 +6,7 @@ import androidx.room.Room
 import androidx.room.RoomDatabase
 import androidx.room.migration.Migration
 import androidx.sqlite.db.SupportSQLiteDatabase
+import com.hebao.testkotlin.db.base.DB_NAME
 import com.hebao.testkotlin.db.dao.BookDao
 import com.hebao.testkotlin.db.entity.Book
 
@@ -25,10 +26,9 @@ abstract class BookDatabase : RoomDatabase() {
             if (instance == null) {
                 synchronized(BookDatabase::class) {
                     if (instance == null) {
-                        instance = Room.databaseBuilder(
-                            applicationContext, BookDatabase::class.java,
-                            "book.db"
-                        )
+                        instance = Room.databaseBuilder(applicationContext,
+                            BookDatabase::class.java,
+                            DB_NAME)
                             .addCallback(CreatedCallBack)
                             .addMigrations(*MIGRATION_LIST)
                             .build()

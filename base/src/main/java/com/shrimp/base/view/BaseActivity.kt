@@ -26,7 +26,7 @@ import com.shrimp.base.widgets.dialog.ProgressDialog
 /**
  * Created by chasing on 2021/10/19.
  */
-abstract class BaseActivity<VM : BaseActivityModel, B : ViewDataBinding> : AppCompatActivity() {
+abstract class BaseActivity<VM : BaseViewModel, B : ViewDataBinding> : AppCompatActivity() {
     protected lateinit var context: Activity
     protected var oneClickUtil = OneClickUtil()
     protected var isPause = false
@@ -51,11 +51,6 @@ abstract class BaseActivity<VM : BaseActivityModel, B : ViewDataBinding> : AppCo
         fun start(context: Context, intent: Intent) {
             if (intent.component != null && ActivityUtil.oneClickUtil.check(intent.component?.className)) return
             context.startActivity(intent)
-        }
-
-        fun startForResult(activity: Activity, intent: Intent, requestCode: Int) {
-            if (intent.component != null && ActivityUtil.oneClickUtil.check(intent.component?.className)) return
-            activity.startActivityForResult(intent, requestCode)
         }
     }
 
@@ -130,7 +125,7 @@ abstract class BaseActivity<VM : BaseActivityModel, B : ViewDataBinding> : AppCo
     abstract fun initDataObserve()
 
     /**
-     * 需要使用Activity进行加载数据的情形，例如：加载本地相册需要使用FragementActivity
+     * 需要使用Activity进行加载数据的情形，例如：加载本地相册需要使用FragmentActivity
      * 其它数据加载写在ViewModel
      */
     open fun loadData() {

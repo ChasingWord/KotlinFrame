@@ -2,13 +2,14 @@ package com.hebao.testkotlin.db.base
 
 import androidx.room.*
 
+const val DB_NAME = "room.db"
+
 /**
  * Created by chasing on 2021/10/26.
  * 默认的更新删除都是以主键PrimaryKey为条件进行的
  */
 @Dao
 interface BaseDao<T> {
-
     @Insert(onConflict = OnConflictStrategy.REPLACE)
     suspend fun insert(t: T): Long
 

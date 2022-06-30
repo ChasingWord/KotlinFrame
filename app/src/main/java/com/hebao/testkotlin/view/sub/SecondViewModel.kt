@@ -4,7 +4,7 @@ import android.app.Application
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.viewModelScope
 import com.shrimp.base.utils.ActivityUtil
-import com.shrimp.base.view.BaseActivityModel
+import com.shrimp.base.view.BaseViewModel
 import com.shrimp.network.callback.AbstractCallBack
 import com.shrimp.network.entity.base.ResponseResult
 import com.shrimp.network.entity.res.PresetWordDataInfo
@@ -13,7 +13,7 @@ import com.shrimp.network.entity.res.Tags
 /**
  * Created by chasing on 2021/10/25.
  */
-class SecondViewModel(application: Application) : BaseActivityModel(application) {
+class SecondViewModel(application: Application) : BaseViewModel(application) {
     val title: MutableLiveData<String> = MutableLiveData("第二个Aty")
     val text: MutableLiveData<String> = MutableLiveData("")
     val data: MutableLiveData<List<Tags>> = MutableLiveData(ArrayList())

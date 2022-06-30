@@ -15,7 +15,7 @@
             app:tl_selectTextSize="@dimen/text_size_14sp"
             app:tl_unselectTextSize="@dimen/text_size_12sp"
             app:tl_textSelectColor="#ff86b5"
-            app:tl_textUnselectColor="@color/cardview_dark_background"
+            app:tl_textUnselectColor="@color/black"
             app:tl_indicator_color="#ff86b5"
             app:tl_indicator_width="20dp"
             app:tl_indicator_height="3dp"
