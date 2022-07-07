@@ -1,6 +1,8 @@
 package com.shrimp.network.utils
 
 import okhttp3.*
+import okhttp3.MediaType.Companion.toMediaTypeOrNull
+import okhttp3.RequestBody.Companion.toRequestBody
 import okio.Buffer
 import java.io.IOException
 import java.lang.Exception
@@ -11,15 +13,15 @@ import java.lang.StringBuilder
  */
 class EncryptionInterceptor: Interceptor {
     @Throws(IOException::class)
-    override fun intercept(chain: Interceptor.Chain): Response? {
+    override fun intercept(chain: Interceptor.Chain): Response {
         var request = chain.request()
-        val oldBody = request.body()
+        val oldBody = request.body
         var body: RequestBody? = null
         if (oldBody is MultipartBody) {
             body = oldBody
         } else {
             val data = writeTo(oldBody)
-            if (data != null) body = RequestBody.create(data[1] as MediaType?, data[0] as String)
+            if (data != null) body = (data[0] as String).toRequestBody(data[1] as MediaType?)
         }
         // 添加统一的请求头
         val builder = request.newBuilder()
@@ -28,7 +30,7 @@ class EncryptionInterceptor: Interceptor {
 
         //开启method(request.method(), body)方法才会重新设置请求体，因此此方法不适合用于get
         //get要求不能拥有请求体
-        if ("POST" == request.method()) builder.method(request.method(), body)
+        if ("POST" == request.method) builder.method(request.method, body)
         request = builder.build()
         return chain.proceed(request)
     }
@@ -43,7 +45,7 @@ class EncryptionInterceptor: Interceptor {
                 mediaType = body.contentType()
             }
             if (mediaType == null) {
-                mediaType = MediaType.parse("application/json; charset=UTF-8")
+                mediaType = "application/json; charset=UTF-8".toMediaTypeOrNull()
             }
             val stringBuffer = StringBuilder()
             var s: String?

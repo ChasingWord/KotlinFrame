@@ -462,7 +462,7 @@ object FileUtil {
     fun openFile(context: Context, filePath: String) {
         if (!exists(context, filePath)) {
             //如果文件不存在
-            ActivityUtil.showToast(context, "打开失败，原因：文件已经被移动或者删除")
+            showToast("打开失败，原因：文件已经被移动或者删除")
         } else {
             try {
                 val fileUri = getFileUri(context, filePath)
@@ -475,7 +475,7 @@ object FileUtil {
                     context.startActivity(intent)
                 }
             } catch (e: Exception) {
-                ActivityUtil.showToast(context, "未找到可以打开该文件的软件")
+                showToast("未找到可以打开该文件的软件")
             }
         }
     }
@@ -861,7 +861,7 @@ object FileUtil {
             throw NullPointerException()
         }
         //Android10以下需要有读权限才能进行操作ContentResolver.query
-        if (context is Activity && ActivityUtil.checkNeedRequestReadStoragePermission(context)) return null
+        if (context is Activity && context.checkAndRequestReadStoragePermission() != 0) return null
         var uri: Uri? = null
         var cursor = context.contentResolver.query(
             MediaStore.Images.Media.EXTERNAL_CONTENT_URI,
@@ -921,7 +921,7 @@ object FileUtil {
             throw NullPointerException()
         }
         //Android10以下需要有读权限才能进行操作ContentResolver.query
-        if (context is Activity && ActivityUtil.checkNeedRequestReadStoragePermission(context)) {
+        if (context is Activity && context.checkAndRequestReadStoragePermission() != 0) {
             listener.onFileUriBack(null)
         } else {
             ThreadPoolUtil.execute(object : ComparableRunnable() {

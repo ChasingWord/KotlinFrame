@@ -69,13 +69,13 @@ class VerticalDividerItemDecoration(builder: Builder) : FlexibleDividerDecoratio
                         getDividerSize(
                             position,
                             parent
-                        ), 0, getTopDividerSize(position, parent), 0
+                        ), 0, getLeftDividerSize(position, parent), 0
                     ) else
                     outRect?.set(getDividerSize(position, parent), 0, 0, 0)
             } else {
                 if (position == 0 && showTopDivider)
                     outRect?.set(
-                        getTopDividerSize(
+                        getLeftDividerSize(
                             position,
                             parent
                         ), 0, getDividerSize(position, parent), 0
@@ -101,7 +101,7 @@ class VerticalDividerItemDecoration(builder: Builder) : FlexibleDividerDecoratio
         }
     }
 
-    private fun getTopDividerSize(position: Int, parent: RecyclerView): Int {
+    private fun getLeftDividerSize(position: Int, parent: RecyclerView): Int {
         when {
             paintProvider != null -> {
                 return paintProvider!!.dividerPaint(position, parent)!!.strokeWidth.toInt()

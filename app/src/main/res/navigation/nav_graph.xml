@@ -16,8 +16,8 @@
             app:destination="@id/SecondFragment" />
 
         <action
-            android:id="@+id/action_FirstFragment_to_placeholder"
-            app:destination="@id/placeholder" />
+            android:id="@+id/action_FirstFragment_to_TestMotion"
+            app:destination="@id/TestMotionFragment" />
     </fragment>
     <fragment
         android:id="@+id/SecondFragment"
@@ -29,7 +29,10 @@
             android:id="@+id/action_SecondFragment_to_FirstFragment"
             app:destination="@id/FirstFragment" />
     </fragment>
-    <fragment android:id="@+id/placeholder" />
-
-
+    <fragment
+        android:id="@+id/TestMotionFragment"
+        android:label="Test Motion"
+        android:name="com.hebao.testkotlin.view.main.TestMotionFragment"
+        tools:layout="@layout/fragment_test_motion">
+    </fragment>
 </navigation>

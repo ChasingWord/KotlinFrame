@@ -25,10 +25,6 @@ class SecondActivity : BaseActivity<SecondViewModel, ActivitySecondBinding>() {
         }
     }
 
-    override fun changeConfig() {
-        statusBarColor = R.color.transparent
-    }
-
     override fun getViewModelClass(): Class<SecondViewModel> = SecondViewModel::class.java
 
     override fun inflateDataBinding() = ActivitySecondBinding.inflate(layoutInflater)

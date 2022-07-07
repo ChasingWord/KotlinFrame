@@ -109,7 +109,7 @@ object SystemUtil {
                     Intent(Settings.ACTION_REQUEST_IGNORE_BATTERY_OPTIMIZATIONS)
                 intent.data = Uri.parse("package:" + activity.packageName)
                 activity.startActivity(intent)
-            } else ActivityUtil.showToast(activity, "已经处于保持活跃状态！")
+            } else showToast("已经处于保持活跃状态！")
         }
     }
 }

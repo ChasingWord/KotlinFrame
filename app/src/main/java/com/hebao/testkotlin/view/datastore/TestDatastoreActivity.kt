@@ -1,20 +1,19 @@
 package com.hebao.testkotlin.view.datastore
 
 import android.content.Context
-import android.os.Bundle
 import android.widget.Toast
 import androidx.recyclerview.widget.GridLayoutManager
 import com.hebao.testkotlin.R
 import com.hebao.testkotlin.databinding.ActivityTestDatastoreBinding
 import com.shrimp.base.decoration.DividerGridItemDecoration
+import com.shrimp.base.utils.ActivityUtil
 import com.shrimp.base.utils.ObjectCacheUtil
-import com.shrimp.base.utils.StatusBarUtil
+import com.shrimp.base.utils.checkAndRequestReadStoragePermission
 import com.shrimp.base.utils.media.MediaLoader
 import com.shrimp.base.view.BaseActivity
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
-import java.util.*
 
 /**
  * Created by chasing on 2021/11/10.
@@ -36,8 +35,7 @@ class TestDatastoreActivity : BaseActivity<TestDatastoreViewModel, ActivityTestD
         ActivityTestDatastoreBinding.inflate(layoutInflater)
 
     override fun changeConfig() {
-        needChangeStatusBar = false
-        StatusBarUtil.setFullScreen(this)
+        isFullScreen = true
     }
 
     override fun initView() {
@@ -95,23 +93,31 @@ class TestDatastoreActivity : BaseActivity<TestDatastoreViewModel, ActivityTestD
         dataBinding.rcvImg.adapter = imgAdapter
         dataBinding.rcvImg.addItemDecoration(DividerGridItemDecoration(context).colorResId(R.color.transparent)
             .widthResId(R.dimen.dp_4).widthOfVerticalResId(R.dimen.dp_4))
+
+        if (checkAndRequestReadStoragePermission() == 0) {
+            queryImage()
+        } else {
+            ActivityUtil.openPermissionSettingUI(this)
+        }
     }
 
     fun isValidBST(root: TreeNode?): Boolean {
-        return isValid(root, Int.MIN_VALUE - 1, Int.MAX_VALUE + 1)
+        return isValid(root, Int.MIN_VALUE, Int.MAX_VALUE)
     }
 
-    fun isValid(root: TreeNode?, minVal: Int, maxVal: Int): Boolean{
+    fun isValid(root: TreeNode?, minVal: Int, maxVal: Int): Boolean {
         if (root == null) return true
-        val leftValid = root.left == null || root.left!!.`val` in (minVal + 1..root.`val` - 1)
-        val rightValid = root.right == null || root.right!!.`val` in (root.`val` + 1..maxVal - 1)
-        return leftValid && rightValid && isValid(root.left, minVal, root.`val`) && isValid(root.right, root.`val`, maxVal)
+        val leftValid = root.left == null || root.left!!.`val` in (minVal + 1 until root.`val`)
+        val rightValid = root.right == null || root.right!!.`val` in (root.`val` + 1 until maxVal)
+        return leftValid && rightValid && isValid(root.left,
+            minVal,
+            root.`val`) && isValid(root.right, root.`val`, maxVal)
     }
 
     class TreeNode(var `val`: Int) {
-         var left: TreeNode? = null
-         var right: TreeNode? = null
-     }
+        var left: TreeNode? = null
+        var right: TreeNode? = null
+    }
 
     override fun initDataObserve() {
         viewModel.folderList.observe(this) {
@@ -119,9 +125,20 @@ class TestDatastoreActivity : BaseActivity<TestDatastoreViewModel, ActivityTestD
         }
     }
 
-    override fun onCreate(savedInstanceState: Bundle?) {
-        super.onCreate(savedInstanceState)
+    override fun onRequestPermissionsResult(
+        requestCode: Int,
+        permissions: Array<out String>,
+        grantResults: IntArray,
+    ) {
+        super.onRequestPermissionsResult(requestCode, permissions, grantResults)
+        if (grantResults[0] == android.content.pm.PackageManager.PERMISSION_GRANTED) {
+            queryImage()
+        }
+    }
+
+    private fun queryImage(){
         val loader = MediaLoader(this, viewModel)
+        loader.setShowVideo(true)
         loader.load()
     }
 }

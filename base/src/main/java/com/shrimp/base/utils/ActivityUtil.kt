@@ -17,10 +17,7 @@ import android.provider.MediaStore
 import android.provider.Settings
 import android.view.View
 import android.view.inputmethod.InputMethodManager
-import android.webkit.CookieManager
 import android.widget.EditText
-import android.widget.Toast
-import androidx.annotation.StringRes
 import androidx.core.app.ActivityCompat
 import androidx.core.app.NotificationCompat
 import com.shrimp.base.R
@@ -84,6 +81,7 @@ object ActivityUtil {
     /**
      * 退出应用程序
      */
+    @SuppressLint("MissingPermission")
     fun appExit(context: Context) {
         try {
             getNotificationManager(context).cancelAll() //退出应用程序取消所有状态栏消息
@@ -100,7 +98,7 @@ object ActivityUtil {
         val copy = context.getSystemService(Context.CLIPBOARD_SERVICE) as ClipboardManager
         val data = ClipData.newPlainText(content, content)
         copy.setPrimaryClip(data)
-        showToast(context, "复制成功")
+        showToast("复制成功")
     }
 
     //获取粘贴板文本
@@ -111,25 +109,6 @@ object ActivityUtil {
             0
         ).text.toString()
         return ""
-    }
-
-    //清除WebView的cookies数据.防止下一个登录用户还是传递上一个用户的cookies记录造成网页中信息紊乱。
-    fun clearWebViewCookies() {
-        //清除网页的cookie记录
-        //CookieSyncManager.createInstance(ToolboxWebViewActivity);
-        val cookieManager = CookieManager.getInstance()
-        //清除cookie
-        cookieManager.removeSessionCookies(null)
-        cookieManager.removeAllCookies(null)
-    }
-
-    // 统一写在一个地方使用Toast，方便以后统一修改成其它样式
-    fun showToast(context: Context, @StringRes stringId: Int) {
-        Toast.makeText(context, stringId, Toast.LENGTH_SHORT).show()
-    }
-
-    fun showToast(context: Context, message: String) {
-        Toast.makeText(context, message, Toast.LENGTH_SHORT).show()
     }
 
     /**
@@ -173,28 +152,11 @@ object ActivityUtil {
         }
     }
 
-    ///如果输入法关闭，则打开
+    //如果输入法关闭，则打开
     fun openInputMethod(focusView: View, context: Activity) {
         focusView.requestFocus()
         val imm = context.getSystemService(Context.INPUT_METHOD_SERVICE) as InputMethodManager
         imm.showSoftInput(focusView, InputMethodManager.SHOW_IMPLICIT)
-    }
-
-    //打开系统设置界面
-    fun openSettingUI(activity: Activity) {
-        activity.startActivity(Intent(Settings.ACTION_SETTINGS))
-    }
-
-    //拨打电话
-    fun callPhone(context: Context, telPhone: String) {
-        try {
-            if (requestPermission(context as Activity, Manifest.permission.CALL_PHONE)) return
-            val telUri = Uri.parse("tel:$telPhone")
-            val telIntent = Intent(Intent.ACTION_CALL, telUri)
-            context.startActivity(telIntent)
-        } catch (e: Exception) {
-            showToast(context, "拨打电话失败！")
-        }
     }
 
     private val requestCodeTakePhoto = 101 //拍照标识
@@ -208,7 +170,7 @@ object ActivityUtil {
 
     // 打开相机
     fun takePhoto(activity: Activity): String? {
-        if (requestPermission(activity, Manifest.permission.CAMERA)) return null
+        if (activity.requestPermission(Manifest.permission.CAMERA) != 0) return null
         try {
             val filePath: String =
                 FileUtil.getTempPath(activity) + File.separator + FileUtil.getPhotoFileName()
@@ -220,36 +182,34 @@ object ActivityUtil {
                 return filePath
             }
         } catch (e: Exception) {
-            showToast(activity, activity.resources.getString(R.string.shrimp_photo_can_not_write))
+            showToast(activity.resources.getString(R.string.shrimp_photo_can_not_write))
         }
         return null
     }
 
     //裁剪图片方法实现--任意宽高
     fun beginCrop(activity: Activity, picPath: String): String? {
-        return beginCrop(activity, picPath, 0, 0, 0, 0)
+        return beginCrop(activity, picPath, 0, 0, 0, 0, false, false)
     }
 
     //裁剪图片方法实现--widthRatio/heightRatio为裁剪的宽高比
     fun beginCrop(activity: Activity, picPath: String, widthRatio: Int, heightRatio: Int): String? {
-        return beginCrop(activity, picPath, widthRatio, heightRatio, 0, 0)
+        return beginCrop(activity, picPath, widthRatio, heightRatio, 0, 0, false, false)
     }
 
     //裁剪图片方法实现--裁剪头像（注：裁剪比例设置为1:1，则裁剪的显示框会变成圆形）
     fun beginCropHeadImg(activity: Activity, picPath: String): String? {
-        return beginCrop(activity, picPath, 1, 1, 150, 150)
+        return beginCrop(activity, picPath, 1, 1, 150, 150, false, true)
     }
 
     private fun beginCrop(
-        activity: Activity,
-        picPath: String,
-        widthRatio: Int,
-        heightRatio: Int,
-        outputX: Int,
-        outputY: Int
+        activity: Activity, picPath: String, widthRatio: Int, heightRatio: Int,
+        outputX: Int, outputY: Int, copyToCache: Boolean, circleCrop: Boolean,
     ): String? {
+        var picPathTemp = picPath
         try {
-            val uri = FileUtil.getFileUri(activity, picPath)
+            if (copyToCache) picPathTemp = FileUtil.getOperationalFilePath(activity, picPathTemp)
+            val uri: Uri? = FileUtil.getFileUri(activity, picPathTemp)
             if (uri != null) {
                 val intent = Intent("com.android.camera.action.CROP")
                 intent.addFlags(Intent.FLAG_GRANT_WRITE_URI_PERMISSION or Intent.FLAG_GRANT_READ_URI_PERMISSION)
@@ -266,22 +226,40 @@ object ActivityUtil {
                     intent.putExtra("outputY", outputY)
                 }
                 intent.putExtra("outputFormat", Bitmap.CompressFormat.JPEG.toString())
-                //android11图片裁剪保存的时候不能访问应用私有目录，只能保存在共有目录
-                val uriTempFile =
+                intent.putExtra("circleCrop", circleCrop) //设置裁剪框是否圆形，部分手机支持
+                val uriTempFile: Uri? = if (FileUtil.isBelow29()) {
+                    // 部分低于29的手机不能直接保存到公共目录，会报权限错误，所以需要区分保存
+                    Uri.fromFile(File(FileUtil.getCachePath(activity) + FileUtil.getPhotoFileName()))
+                } else {
+                    //android11图片裁剪保存的时候不能访问应用私有目录，只能保存在共有目录
                     FileUtil.getDownloadPicUri(activity, FileUtil.getPhotoFileName())
-                intent.putExtra(MediaStore.EXTRA_OUTPUT, uriTempFile)
-                activity.startActivityForResult(intent, requestCodeCropPhoto)
-                return FileUtil.getFilePathByUri(activity, uriTempFile)
+                }
+                if (uriTempFile != null) {
+                    intent.putExtra(MediaStore.EXTRA_OUTPUT, uriTempFile)
+                    activity.startActivityForResult(intent, requestCodeCropPhoto)
+                    return FileUtil.getFilePathByUri(activity, uriTempFile)
+                } else {
+                    showToast("图片创建异常！")
+                    return null
+                }
             }
-        } catch (ignored: Exception) {
-            showToast(activity, activity.resources.getString(R.string.shrimp_photo_can_not_write))
+        } catch (e: java.lang.Exception) {
+            if (!copyToCache && e.message != null && e.message!!.contains("not have permission")) return beginCrop(
+                activity,
+                picPathTemp,
+                widthRatio,
+                heightRatio,
+                outputX,
+                outputY,
+                true,
+                true) else showToast("图片生成失败！" + e.message)
         }
         return null
     }
 
     //打开系统视频选择界面
     fun openVideoSelectActivity(activity: Activity) {
-        if (checkNeedRequestReadStoragePermission(activity)) return
+        if (activity.checkAndRequestReadStoragePermission() != 0) return
         val intent = Intent()
         intent.type = "video/*"
         intent.action = Intent.ACTION_OPEN_DOCUMENT
@@ -294,7 +272,7 @@ object ActivityUtil {
 
     //打开系统文件选择界面
     fun openFileSelectActivity(activity: Activity) {
-        if (checkNeedRequestReadStoragePermission(activity)) return
+        if (activity.checkAndRequestReadStoragePermission() != 0) return
         val intent = Intent()
         val sb = StringBuilder()
         val mimeTypeList = arrayOfNulls<String>(chooseFileTypeList.size)
@@ -311,6 +289,34 @@ object ActivityUtil {
             Intent.createChooser(intent, "选择要上传的文件"),
             requestCodeSelectFile
         )
+    }
+
+    //打开系统设置界面
+    fun openSettingUI(activity: Activity) {
+        activity.startActivity(Intent(Settings.ACTION_SETTINGS))
+    }
+
+    //打开权限设置界面
+    fun openPermissionSettingUI(activity: Activity) {
+        try {
+            val intent = Intent()
+            intent.action = Settings.ACTION_APPLICATION_DETAILS_SETTINGS
+            intent.data = Uri.parse("package:" + activity.packageName)
+            activity.startActivity(intent)
+        } catch (ignored: java.lang.Exception) {
+        }
+    }
+
+    //拨打电话
+    fun callPhone(context: Context, telPhone: String) {
+        try {
+            if ((context as Activity).requestPermission(Manifest.permission.CALL_PHONE) != 0) return
+            val telUri = Uri.parse("tel:$telPhone")
+            val telIntent = Intent(Intent.ACTION_CALL, telUri)
+            context.startActivity(telIntent)
+        } catch (e: Exception) {
+            showToast("拨打电话失败！")
+        }
     }
 
     /**
@@ -348,7 +354,7 @@ object ActivityUtil {
         title: String,
         content: String,
         intent: Intent,
-        notificationId: Int
+        notificationId: Int,
     ) {
         intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TOP) //会清除跳转目标activity及之上的所有activity
         val clickIntent = Intent(context, NotificationClickReceiver::class.java)
@@ -370,7 +376,7 @@ object ActivityUtil {
         title: String,
         content: String,
         clickIntent: Intent,
-        notificationId: Int
+        notificationId: Int,
     ) {
         val curTime = System.currentTimeMillis()
         val needSound = curTime - PRE_SHOW_NOTIFICATION_TIME > 1000
@@ -408,7 +414,7 @@ object ActivityUtil {
         title: String,
         content: String,
         clickIntent: Intent,
-        notificationId: Int
+        notificationId: Int,
     ) {
 //        long curTime = System.currentTimeMillis();
 //        boolean needSound = curTime - PRE_SHOW_NOTIFICATION_TIME > 1000;
@@ -437,60 +443,90 @@ object ActivityUtil {
             builder.build()
         )
     }
+}
 
-    // 进行检测是否拥有权限
-    fun checkPermissions(activity: Activity, permission: String): Boolean {
-        return ActivityCompat.checkSelfPermission(
-            activity,
-            permission
-        ) == PackageManager.PERMISSION_GRANTED
-    }
+/**
+ * 请求权限，返回是否需要请求
+ * WRITE_EXTERNAL_STORAGE权限包含了READ_EXTERNAL_STORAGE，所以只进行WRITE_EXTERNAL_STORAGE权限请求即可
+ * 0 不需要请求
+ * 1 需要请求且发起了请求
+ * -1 需求请求，但因为是永久拒绝所以没有发起请求
+ */
+@SuppressLint("CheckResult")
+fun Activity.requestPermission(
+    vararg permission: String,
+    jumpPermissionSettingUI: Boolean = false,
+): Int =
+    // 6.0以下不需要请求权限，AndroidManifest有写即可
+    when {
+        Build.VERSION.SDK_INT < Build.VERSION_CODES.M -> 0
+        permission.isNotEmpty() -> {
+            var needRequest = false
+            val needRequestPermission = ArrayList<String>()
+            for (permissionItem in permission) {
+                if (ActivityCompat.checkSelfPermission(
+                        this,
+                        permissionItem
+                    ) != PackageManager.PERMISSION_GRANTED
+                ) {
+                    needRequest = true
 
-    // 请求权限，返回是否需求请求
-    // WRITE_EXTERNAL_STORAGE权限包含了READ_EXTERNAL_STORAGE，所以只进行WRITE_EXTERNAL_STORAGE权限请求即可
-    @SuppressLint("CheckResult")
-    fun requestPermission(activity: Activity, vararg permission: String): Boolean =
-        // 6.0以下不需要请求权限，AndroidManifest有写即可
-        when {
-            Build.VERSION.SDK_INT < Build.VERSION_CODES.M -> false
-            permission.isNotEmpty() -> {
-                var needRequest = false
-                val needRequestPermission = ArrayList<String>()
-                for (permissionItem in permission) {
-                    if (ActivityCompat.checkSelfPermission(
-                            activity,
-                            permissionItem
-                        ) != PackageManager.PERMISSION_GRANTED
-                    ) {
-                        needRequest = true
-                        needRequestPermission.add(permissionItem)
-                        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
-                            CoroutineScope(Dispatchers.Main).launch {
-                                try {
-                                    activity.requestPermissions(
-                                        needRequestPermission.toTypedArray(),
-                                        0
-                                    )
-                                } catch (e: Exception) {
-                                }
-                            }
+
+                    val shouldShow =
+                        ActivityCompat.shouldShowRequestPermissionRationale(this, permissionItem)
+                    if (!shouldShow) {
+                        val hadRequest =
+                            ObjectCacheUtil.readObjectBySP(this, permissionItem, false) as Boolean
+                        if (hadRequest) {
+                            // 请求过被永久拒绝返回false
+                            if (jumpPermissionSettingUI)
+                                ActivityUtil.openPermissionSettingUI(this)
+                        } else {
+                            // 没有申请过返回false
+                            ObjectCacheUtil.saveObjectBySP(this, permissionItem, true)
+                            needRequestPermission.add(permissionItem)
                         }
+                    } else {
+                        // 请求过被普通拒绝返回true
+                        needRequestPermission.add(permissionItem)
+                        ObjectCacheUtil.saveObjectBySP(this, permissionItem, true)
                     }
                 }
-                needRequest
             }
-            else -> false
+
+            if (needRequest) {
+                if (needRequestPermission.isNotEmpty()) {
+                    CoroutineScope(Dispatchers.Main).launch {
+                        try {
+                            requestPermissions(
+                                needRequestPermission.toTypedArray(),
+                                0
+                            )
+                        } catch (e: Exception) {
+                        }
+                    }
+                    1
+                } else -1
+            } else 0
         }
-
-    //检测是否需要请求存储权限，true是则自动进行请求
-    fun checkNeedRequestReadStoragePermission(activity: Activity): Boolean {
-        return requestPermission(activity, Manifest.permission.READ_EXTERNAL_STORAGE)
+        else -> 0
     }
 
-    fun checkNeedRequestWriteStoragePermission(activity: Activity): Boolean {
-        return FileUtil.isBelow29() && requestPermission(
-            activity,
-            Manifest.permission.WRITE_EXTERNAL_STORAGE
-        )
-    }
-}
+// 进行检测是否拥有权限
+fun Activity.checkPermission(permission: String) =
+    ActivityCompat.checkSelfPermission(
+        this,
+        permission
+    ) == PackageManager.PERMISSION_GRANTED
+
+// 检测并请求读存储权限
+fun Activity.checkAndRequestReadStoragePermission(jumpPermissionSettingUI: Boolean = false): Int =
+    requestPermission(Manifest.permission.READ_EXTERNAL_STORAGE,
+        jumpPermissionSettingUI = jumpPermissionSettingUI)
+
+// 检测并请求写存储权限
+fun Activity.checkAndRequestWriteStoragePermission(jumpPermissionSettingUI: Boolean = false): Int =
+    if (!FileUtil.isBelow29()) 0 else requestPermission(Manifest.permission.WRITE_EXTERNAL_STORAGE,
+        jumpPermissionSettingUI = jumpPermissionSettingUI)
+
+

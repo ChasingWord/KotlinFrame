@@ -4,6 +4,7 @@ import android.app.Application
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.viewModelScope
 import com.shrimp.base.utils.ActivityUtil
+import com.shrimp.base.utils.showToast
 import com.shrimp.base.view.BaseViewModel
 import com.shrimp.network.callback.AbstractCallBack
 import com.shrimp.network.entity.base.ResponseResult
@@ -29,7 +30,7 @@ class SecondViewModel(application: Application) : BaseViewModel(application) {
             }
 
             override suspend fun onFail(msg: String) {
-                ActivityUtil.showToast(getApplication(), msg)
+                showToast(msg)
             }
         }, viewModelScope)
     }
@@ -45,7 +46,7 @@ class SecondViewModel(application: Application) : BaseViewModel(application) {
             }
 
             override suspend fun onFail(msg: String) {
-                ActivityUtil.showToast(getApplication(), msg)
+                showToast(msg)
             }
 
             override suspend fun onCancel() {

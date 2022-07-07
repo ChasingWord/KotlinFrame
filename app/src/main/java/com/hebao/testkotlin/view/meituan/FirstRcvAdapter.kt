@@ -1,15 +1,13 @@
 package com.hebao.testkotlin.view.meituan
 
 import android.content.Context
-import android.view.View
-import android.widget.TextView
+import android.text.TextUtils
+import android.view.ViewGroup
 import androidx.databinding.ViewDataBinding
-import androidx.recyclerview.widget.RecyclerView
 import com.hebao.testkotlin.R
 import com.hebao.testkotlin.databinding.ItemStringBinding
 import com.shrimp.base.adapter.recycler.BaseRecyclerAdapter
 import com.shrimp.base.utils.ItemTouchCallBack
-import com.shrimp.base.utils.getViewWidth
 import java.util.*
 
 /**
@@ -18,9 +16,14 @@ import java.util.*
 class FirstRcvAdapter(context: Context) :
     BaseRecyclerAdapter<String>(context, R.layout.item_string),
     ItemTouchCallBack.OnItemTouchListener {
-    override fun convert(viewType: Int, dataBinding: ViewDataBinding, item: String) {
+
+    override fun convert(position: Int, viewType: Int, dataBinding: ViewDataBinding, item: String) {
         dataBinding as ItemStringBinding
         dataBinding.itemString.text = item
+
+        if (TextUtils.isEmpty(item)){
+            dataBinding.itemString.layoutParams.height = context.resources.getDimensionPixelSize(R.dimen.dp_70)
+        }
     }
 
     override fun onMove(fromPosition: Int, toPosition: Int) {

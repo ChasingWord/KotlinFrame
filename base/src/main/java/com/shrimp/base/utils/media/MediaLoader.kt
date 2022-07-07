@@ -1,5 +1,6 @@
 package com.shrimp.base.utils.media
 
+import android.annotation.SuppressLint
 import android.database.Cursor
 import android.os.Bundle
 import android.provider.MediaStore
@@ -16,7 +17,7 @@ import java.io.File
 /**
  * Created by chasing on 2022/1/27.
  */
-class MediaLoader(var mActivity: FragmentActivity?, var mCallback: IMediaLoaderCallback?) :
+class MediaLoader(var mActivity: FragmentActivity, var mCallback: IMediaLoaderCallback) :
     LoaderManager.LoaderCallbacks<Cursor> {
     private val imageProjection = arrayOf(
         MediaStore.MediaColumns.DATA,
@@ -41,43 +42,42 @@ class MediaLoader(var mActivity: FragmentActivity?, var mCallback: IMediaLoaderC
 
     // folder result data set
     //是否已经加载完毕 该标识为了避免 onResume时再次调用
-    private var mLoadFinished = false
+    private var loadFinished = false
 
     //文件夹是否已遍历 生成过
-    private var mHasFolderGenerated = false
+    private var hasFolderGenerated = false
 
     //文件夹列表
-    private var mResultFolder: ArrayList<FolderBean> = ArrayList()
+    private var resultFolder: ArrayList<FolderBean> = ArrayList()
 
-    private var mIsShowGif = true
-    private var mIsShowVideo = false
-    private var mIsOnlyVideo = false
+    private var isShowGif = true
+    private var isShowVideo = false
+    private var isOnlyVideo = false
 
     fun setShowGif(showGif: Boolean) {
-        mIsShowGif = showGif
+        isShowGif = showGif
     }
 
     fun setShowVideo(showVideo: Boolean) {
-        mIsShowVideo = showVideo
+        isShowVideo = showVideo
     }
 
     fun setOnlyVideo(onlyVideo: Boolean) {
-        mIsOnlyVideo = onlyVideo
+        isOnlyVideo = onlyVideo
     }
 
     fun load() {
-        if (mActivity != null)
-            LoaderManager.getInstance(mActivity!!).initLoader(0, null, this@MediaLoader)
+        LoaderManager.getInstance(mActivity).initLoader(0, null, this@MediaLoader)
     }
 
-    override fun onCreateLoader(id: Int, args: Bundle?): Loader<Cursor?> {
+    override fun onCreateLoader(id: Int, args: Bundle?): Loader<Cursor> {
         val cursorLoader: CursorLoader
         val contentUri = MediaStore.Files.getContentUri("external")
         val selection: String
         val selectionArgs: Array<String>
-        if (mIsOnlyVideo || !mIsShowVideo) {
+        if (isOnlyVideo || !isShowVideo) {
             selection = selectionSingle
-            selectionArgs = if (mIsOnlyVideo) {
+            selectionArgs = if (isOnlyVideo) {
                 selectionArgsVideo
             } else {
                 selectionArgsImage
@@ -87,23 +87,24 @@ class MediaLoader(var mActivity: FragmentActivity?, var mCallback: IMediaLoaderC
             selectionArgs = selectionAllArgs
         }
         cursorLoader = CursorLoader(
-            mActivity!!,
+            mActivity,
             contentUri,
             imageProjection,
             selection,
             selectionArgs, imageProjection[2] + " DESC"
         )
-        mLoadFinished = false
-        mHasFolderGenerated = false
+        loadFinished = false
+        hasFolderGenerated = false
         return cursorLoader
     }
 
-    override fun onLoadFinished(loader: Loader<Cursor?>, data: Cursor?) {
-        if (!mLoadFinished && data != null) {
+    override fun onLoadFinished(loader: Loader<Cursor>, data: Cursor) {
+        if (!loadFinished) {
             ThreadPoolUtil.execute(object : ComparableRunnable() {
+                @SuppressLint("SdCardPath")
                 override fun run() {
-                    mLoadFinished = true
-                    mResultFolder.clear()
+                    loadFinished = true
+                    resultFolder.clear()
                     if (data.count > 0) {
                         val allList: MutableList<MediaBean> = ArrayList()
                         val allVideoList: MutableList<MediaBean> = ArrayList()
@@ -128,7 +129,7 @@ class MediaLoader(var mActivity: FragmentActivity?, var mCallback: IMediaLoaderC
                                 continue
                             }
                             //过滤GIF
-                            if (!mIsShowGif && (mineType.contains(MineType.GIF) || path.endsWith(
+                            if (!isShowGif && (mineType.contains(MineType.GIF) || path.endsWith(
                                     MineType.GIF
                                 ))
                             ) {
@@ -148,7 +149,7 @@ class MediaLoader(var mActivity: FragmentActivity?, var mCallback: IMediaLoaderC
                             allList.add(mediaBean)
 
                             //没有创建文件夹，先创建文件夹，已创建则直接加入
-                            if (!mHasFolderGenerated) {
+                            if (!hasFolderGenerated) {
                                 // get all folder data
                                 folderFile = File(path).parentFile
                                 if (folderFile != null && folderFile.exists()) {
@@ -160,7 +161,7 @@ class MediaLoader(var mActivity: FragmentActivity?, var mCallback: IMediaLoaderC
                                         mediaBeanList = ArrayList()
                                         mediaBeanList.add(mediaBean)
                                         folder.mediaList = mediaBeanList
-                                        mResultFolder.add(folder)
+                                        resultFolder.add(folder)
                                     } else {
                                         f.mediaList?.add(mediaBean)
                                     }
@@ -169,11 +170,11 @@ class MediaLoader(var mActivity: FragmentActivity?, var mCallback: IMediaLoaderC
                         } while (!data.isClosed && data.moveToNext())
                         if (!data.isClosed) { // 关闭了界面，Cursor就会被关闭，则进行判断关闭了的话就不进行后续操作了
                             //混合类型，添加所有视频集合，如果有的话
-                            if (!mIsOnlyVideo && mIsShowVideo && allVideoList.isNotEmpty()) {
+                            if (!isOnlyVideo && isShowVideo && allVideoList.isNotEmpty()) {
                                 val allVideoFolder = FolderBean("/sdcard", allVideoList[0])
                                 allVideoFolder.name = "所有视频"
                                 allVideoFolder.mediaList = allVideoList
-                                mResultFolder.add(0, allVideoFolder)
+                                resultFolder.add(0, allVideoFolder)
                             }
 
                             //添加所有图片(包括视频)集合
@@ -181,29 +182,28 @@ class MediaLoader(var mActivity: FragmentActivity?, var mCallback: IMediaLoaderC
                                 //构造所有图片的集合
                                 val allImagesFolder = FolderBean("/sdcard", allList[0])
                                 when {
-                                    mIsOnlyVideo -> allImagesFolder.name = "所有视频"
-                                    mIsShowVideo -> allImagesFolder.name = "图片和视频"
+                                    isOnlyVideo -> allImagesFolder.name = "所有视频"
+                                    isShowVideo -> allImagesFolder.name = "图片和视频"
                                     else -> allImagesFolder.name = "所有图片"
                                 }
                                 allImagesFolder.mediaList = allList
-                                mResultFolder.add(0, allImagesFolder)
+                                resultFolder.add(0, allImagesFolder)
                             }
-                            mHasFolderGenerated = true
-                            mCallback?.onLoadFinish(mResultFolder)
+                            hasFolderGenerated = true
+                            mCallback.onLoadFinish(resultFolder)
                         }
                     }
-
                     destroy()
                 }
             })
         } else {
-            mCallback?.onLoadFinish(mResultFolder)
+            mCallback.onLoadFinish(resultFolder)
             destroy()
         }
     }
 
     private fun getFolderByPath(path: String): FolderBean? {
-        for (folder in mResultFolder) {
+        for (folder in resultFolder) {
             if (TextUtils.equals(folder.path, path)) {
                 return folder
             }
@@ -211,12 +211,10 @@ class MediaLoader(var mActivity: FragmentActivity?, var mCallback: IMediaLoaderC
         return null
     }
 
-    private fun destroy(){
+    private fun destroy() {
         ThreadPoolUtil.executeOnMainThread {
             // 销毁MediaLoader，不销毁，每次返回界面都会执行一次查询
-            LoaderManager.getInstance(mActivity!!).destroyLoader(0)
-            mActivity = null
-            mCallback = null
+            LoaderManager.getInstance(mActivity).destroyLoader(0)
         }
     }
 

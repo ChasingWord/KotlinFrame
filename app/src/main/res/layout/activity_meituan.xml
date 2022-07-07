@@ -47,6 +47,7 @@
             app:layout_constraintTop_toBottomOf="@id/toolbar">
 
             <com.google.android.material.appbar.AppBarLayout
+                android:id="@+id/appBar"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:background="@color/transparent">
@@ -81,6 +82,38 @@
             </LinearLayout>
 
         </androidx.coordinatorlayout.widget.CoordinatorLayout>
+
+        <View
+            android:id="@+id/shopCarBg"
+            android:layout_width="match_parent"
+            android:layout_height="50dp"
+            android:layout_marginStart="14dp"
+            android:layout_marginEnd="14dp"
+            android:layout_marginBottom="10dp"
+            android:background="@drawable/shape_000000_90"
+            app:layout_constraintBottom_toBottomOf="parent" />
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="14dp"
+            android:text="总额：100￥"
+            android:textColor="@color/white"
+            android:textSize="@dimen/text_size_14sp"
+            app:layout_constraintBottom_toBottomOf="@id/shopCarBg"
+            app:layout_constraintStart_toStartOf="@id/shopCarBg"
+            app:layout_constraintTop_toTopOf="@id/shopCarBg" />
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginEnd="14dp"
+            android:text="满200起送"
+            android:textColor="@color/white"
+            android:textSize="@dimen/text_size_14sp"
+            app:layout_constraintBottom_toBottomOf="@id/shopCarBg"
+            app:layout_constraintEnd_toEndOf="@id/shopCarBg"
+            app:layout_constraintTop_toTopOf="@id/shopCarBg" />
 
     </androidx.constraintlayout.widget.ConstraintLayout>
 

@@ -2,12 +2,14 @@ package com.hebao.testkotlin.view.main
 
 import android.view.LayoutInflater
 import android.view.ViewGroup
+import androidx.core.content.ContextCompat
 import androidx.fragment.app.Fragment
 import androidx.navigation.fragment.findNavController
 import com.hebao.testkotlin.R
 import com.hebao.testkotlin.databinding.FragmentSecondBinding
 import com.shrimp.base.adapter.viewpager.FragmentPagerWithTitlesAdapter
 import com.shrimp.base.utils.GenericTools
+import com.shrimp.base.utils.StatusBarUtil
 import com.shrimp.base.view.BaseFragment
 
 /**
@@ -24,6 +26,8 @@ class SecondFragment : BaseFragment<SecondFragmentViewModel, FragmentSecondBindi
         SecondFragmentViewModel::class.java
 
     override fun initView() {
+        activity?.let { StatusBarUtil.setColorDiff(it, ContextCompat.getColor(it, R.color.white)) }
+
         dataBinding.buttonSecond.setOnClickListener {
             findNavController().navigate(R.id.action_SecondFragment_to_FirstFragment)
         }

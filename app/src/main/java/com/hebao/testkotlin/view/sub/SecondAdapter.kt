@@ -13,7 +13,7 @@ import com.shrimp.network.entity.res.Tags
 class SecondAdapter(context: Context) :
     BaseRecyclerAdapter<Tags>(context, SecondMultiItemTypeSupport()) {
 
-    override fun convert(viewType: Int, dataBinding: ViewDataBinding, item: Tags) {
+    override fun convert(position:Int, viewType: Int, dataBinding: ViewDataBinding, item: Tags) {
         if (dataBinding is ItemSecondBinding) {
             dataBinding.itemSecondText.text = item.Name
         } else if (dataBinding is ItemSecond2Binding) {

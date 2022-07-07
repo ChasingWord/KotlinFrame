@@ -17,10 +17,7 @@ import androidx.fragment.app.FragmentManager
 import androidx.fragment.app.FragmentTransaction
 import androidx.lifecycle.ViewModelProvider
 import com.shrimp.base.R
-import com.shrimp.base.utils.ActivityUtil
-import com.shrimp.base.utils.FixMemLeakUtil
-import com.shrimp.base.utils.OneClickUtil
-import com.shrimp.base.utils.StatusBarUtil
+import com.shrimp.base.utils.*
 import com.shrimp.base.widgets.dialog.ProgressDialog
 
 /**
@@ -38,8 +35,13 @@ abstract class BaseActivity<VM : BaseViewModel, B : ViewDataBinding> : AppCompat
     protected lateinit var viewModel: VM
     protected lateinit var dataBinding: B
 
+    // 是否切换状态栏
     protected var needChangeStatusBar = true
+    // 状态栏是否深色主题
     protected var isStatusBarDarkMode = true
+    // 是否全屏模式
+    protected var isFullScreen = false
+    // 状态栏颜色，当设置透明00000000时，则布局会顶到最上
     protected var statusBarColor = R.color.ffffff
 
     companion object {
@@ -66,6 +68,7 @@ abstract class BaseActivity<VM : BaseViewModel, B : ViewDataBinding> : AppCompat
         changeConfig()
         if (needChangeStatusBar) {
             when {
+                isFullScreen -> StatusBarUtil.setFullScreen(this)
                 statusBarColor == R.color.transparent -> StatusBarUtil.setTransparentStatusBar(
                     this,
                     isStatusBarDarkMode
@@ -174,40 +177,6 @@ abstract class BaseActivity<VM : BaseViewModel, B : ViewDataBinding> : AppCompat
                 }, 300 - (time - showLoadingTime))
             } else {
                 dialog.dismiss()
-            }
-        }
-    }
-
-    override fun onRequestPermissionsResult(
-        requestCode: Int,
-        permissions: Array<out String>,
-        grantResults: IntArray
-    ) {
-        super.onRequestPermissionsResult(requestCode, permissions, grantResults)
-        for (i in grantResults.indices) {
-            if (grantResults[i] == PackageManager.PERMISSION_DENIED) {
-                if (!ActivityCompat.shouldShowRequestPermissionRationale(this, permissions[i])) {
-                    // 被永久拒绝--需要显示请求理由
-                    var toastString: String
-                    when (permissions[i]) {
-                        Manifest.permission.WRITE_EXTERNAL_STORAGE, Manifest.permission.READ_EXTERNAL_STORAGE -> {
-                            toastString = "请前往手机系统设置界面进行设置存储权限！"
-                        }
-                        Manifest.permission.CAMERA -> {
-                            toastString = "请前往手机系统设置界面进行设置拍照权限！"
-                        }
-                        Manifest.permission.CALL_PHONE -> {
-                            toastString = "请前往手机系统设置界面进行设置拨打电话权限！"
-                        }
-                        Manifest.permission.WRITE_CALENDAR -> {
-                            toastString = "请前往手机系统设置界面进行设置读写日历权限！"
-                        }
-                        else -> {
-                            toastString = "请前往手机系统设置界面进行设置相应权限！"
-                        }
-                    }
-                    ActivityUtil.showToast(this, toastString)
-                }
             }
         }
     }

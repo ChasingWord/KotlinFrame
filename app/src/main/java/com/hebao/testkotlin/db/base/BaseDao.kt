@@ -11,22 +11,22 @@ const val DB_NAME = "room.db"
 @Dao
 interface BaseDao<T> {
     @Insert(onConflict = OnConflictStrategy.REPLACE)
-    suspend fun insert(t: T): Long
+    fun insert(t: T): Long
 
     @Insert
-    suspend fun insert(tList: List<T>): List<Long>
+    fun insert(tList: List<T>): Array<Long>
 
     // 它使用与每个实体的主键匹配的查询。
     @Update
-    suspend fun update(t: T)
+    fun update(t: T)
 
     @Update
-    suspend fun update(tList: List<T>)
+    fun update(tList: List<T>)
 
     // 它使用与每个实体的主键匹配的查询。
     @Delete
-    suspend fun delete(t: T)
+    fun delete(t: T)
 
     @Delete
-    suspend fun delete(tList: List<T>)
+    fun delete(tList: List<T>)
 }

@@ -4,6 +4,7 @@ import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import androidx.core.content.ContextCompat
 import androidx.fragment.app.Fragment
 import androidx.navigation.fragment.findNavController
 import com.hebao.testkotlin.R
@@ -14,6 +15,7 @@ import com.hebao.testkotlin.view.meituan.MeiTuanActivity
 import com.hebao.testkotlin.view.sub.SecondActivity
 import com.scwang.smart.refresh.layout.api.RefreshLayout
 import com.scwang.smart.refresh.layout.listener.OnRefreshListener
+import com.shrimp.base.utils.StatusBarUtil
 import kotlinx.coroutines.*
 
 /**
@@ -39,6 +41,8 @@ class FirstFragment : Fragment(), OnRefreshListener {
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
+        activity?.let { StatusBarUtil.setColorDiff(it, ContextCompat.getColor(it, R.color.purple_200)) }
+
         binding.buttonFirst.setOnClickListener {
             findNavController().navigate(R.id.action_FirstFragment_to_SecondFragment)
         }
@@ -53,6 +57,9 @@ class FirstFragment : Fragment(), OnRefreshListener {
         }
         binding.textviewMeituan.setOnClickListener {
             MeiTuanActivity.start(requireContext())
+        }
+        binding.testMotion.setOnClickListener {
+            findNavController().navigate(R.id.action_FirstFragment_to_TestMotion)
         }
 
         binding.refreshLayout.setOnRefreshListener(this)

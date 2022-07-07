@@ -15,7 +15,7 @@ import com.shrimp.base.utils.media.MediaBean
  * Created by chasing on 2022/1/27.
  */
 class ImgAdapter(context : Context) : BaseRecyclerAdapter<MediaBean>(context, R.layout.item_img){
-    override fun convert(viewType: Int, dataBinding: ViewDataBinding, item: MediaBean) {
+    override fun convert(position:Int, viewType: Int, dataBinding: ViewDataBinding, item: MediaBean) {
         dataBinding as ItemImgBinding
         ImageLoadUtil.loadFile(dataBinding.img, item.path)
     }

@@ -7,6 +7,7 @@ import android.util.Base64
 import android.view.MotionEvent
 import android.view.View
 import android.view.ViewGroup
+import android.webkit.CookieManager
 import android.webkit.WebSettings
 import android.webkit.WebView
 import android.widget.EditText
@@ -17,6 +18,18 @@ import java.io.IOException
 import java.io.InputStreamReader
 import java.nio.charset.StandardCharsets
 import kotlin.math.abs
+
+object ViewUtil {
+    //清除WebView的cookies数据.防止下一个登录用户还是传递上一个用户的cookies记录造成网页中信息紊乱。
+    fun clearWebViewCookies() {
+        //清除网页的cookie记录
+        //CookieSyncManager.createInstance(ToolboxWebViewActivity);
+        val cookieManager = CookieManager.getInstance()
+        //清除cookie
+        cookieManager.removeSessionCookies(null)
+        cookieManager.removeAllCookies(null)
+    }
+}
 
 /**
  * EditText竖直方向是否可以滚动

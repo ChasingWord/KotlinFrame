@@ -15,7 +15,7 @@ import androidx.recyclerview.widget.RecyclerView
  */
 abstract class BaseRecyclerAdapter<T>(var context: Context) :
     RecyclerView.Adapter<RecyclerView.ViewHolder>() {
-    private var data: MutableList<T> = ArrayList()
+    protected var data: MutableList<T> = ArrayList()
     private var layoutId: Int = 0
     private val dataBindingMap: HashMap<View, ViewDataBinding> = HashMap()
     private var isMultiItemType = false
@@ -74,7 +74,7 @@ abstract class BaseRecyclerAdapter<T>(var context: Context) :
             if (isMultiItemType) recyclerMultiItemTypeSupport.getDataBinding(holder.itemView)
             else dataBindingMap[holder.itemView]
         if (dataBinding != null)
-            convert(itemViewType, dataBinding, t)
+            convert(position, itemViewType, dataBinding, t)
     }
 
     override fun onBindViewHolder(
@@ -101,7 +101,7 @@ abstract class BaseRecyclerAdapter<T>(var context: Context) :
                 waitDeal.add(payload)
             }
             if (dataBinding != null)
-                convertPart(itemViewType, dataBinding, t, waitDeal)
+                convertPart(position, itemViewType, dataBinding, t, waitDeal)
         }
     }
 
@@ -139,9 +139,10 @@ abstract class BaseRecyclerAdapter<T>(var context: Context) :
         return position.toLong()
     }
 
-    protected abstract fun convert(viewType: Int, dataBinding: ViewDataBinding, item: T)
+    protected abstract fun convert(position:Int, viewType: Int, dataBinding: ViewDataBinding, item: T)
 
     protected open fun convertPart(
+        position:Int,
         viewType: Int,
         dataBinding: ViewDataBinding, item: T,
         payloads: MutableList<Any>
