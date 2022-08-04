@@ -41,7 +41,10 @@ class FirstFragment : Fragment(), OnRefreshListener {
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
-        activity?.let { StatusBarUtil.setColorDiff(it, ContextCompat.getColor(it, R.color.purple_200)) }
+        activity?.let {
+            StatusBarUtil.setColorDiff(it,
+                ContextCompat.getColor(it, R.color.purple_200))
+        }
 
         binding.buttonFirst.setOnClickListener {
             findNavController().navigate(R.id.action_FirstFragment_to_SecondFragment)
@@ -60,6 +63,9 @@ class FirstFragment : Fragment(), OnRefreshListener {
         }
         binding.testMotion.setOnClickListener {
             findNavController().navigate(R.id.action_FirstFragment_to_TestMotion)
+        }
+        binding.test3D.setOnClickListener {
+            findNavController().navigate(R.id.action_FirstFragment_to_test3DModelFragment)
         }
 
         binding.refreshLayout.setOnRefreshListener(this)

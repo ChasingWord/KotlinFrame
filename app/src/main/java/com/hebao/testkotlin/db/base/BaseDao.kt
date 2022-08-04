@@ -10,6 +10,7 @@ const val DB_NAME = "room.db"
  */
 @Dao
 interface BaseDao<T> {
+
     @Insert(onConflict = OnConflictStrategy.REPLACE)
     fun insert(t: T): Long
 

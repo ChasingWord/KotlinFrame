@@ -16,7 +16,6 @@ import com.shrimp.base.widgets.dialog.ProgressDialog
 
 /**
  * Created by chasing on 2021/11/12.
- * 因为系统封装的LifecycleObserve只有
  */
 abstract class BaseFragment<VM : BaseViewModel, B : ViewDataBinding> : Fragment() {
 

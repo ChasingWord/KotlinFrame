@@ -1,23 +1,23 @@
 package com.shrimp.base.view
 
-import android.Manifest
 import android.app.Activity
 import android.content.Context
 import android.content.Intent
-import android.content.pm.PackageManager
 import android.os.Bundle
 import android.os.Handler
 import android.os.Looper
 import android.view.Window
 import androidx.appcompat.app.AppCompatActivity
-import androidx.core.app.ActivityCompat
 import androidx.core.content.ContextCompat
 import androidx.databinding.ViewDataBinding
 import androidx.fragment.app.FragmentManager
 import androidx.fragment.app.FragmentTransaction
 import androidx.lifecycle.ViewModelProvider
 import com.shrimp.base.R
-import com.shrimp.base.utils.*
+import com.shrimp.base.utils.ActivityUtil
+import com.shrimp.base.utils.FixMemLeakUtil
+import com.shrimp.base.utils.OneClickUtil
+import com.shrimp.base.utils.StatusBarUtil
 import com.shrimp.base.widgets.dialog.ProgressDialog
 
 /**
@@ -37,10 +37,13 @@ abstract class BaseActivity<VM : BaseViewModel, B : ViewDataBinding> : AppCompat
 
     // 是否切换状态栏
     protected var needChangeStatusBar = true
+
     // 状态栏是否深色主题
     protected var isStatusBarDarkMode = true
+
     // 是否全屏模式
     protected var isFullScreen = false
+
     // 状态栏颜色，当设置透明00000000时，则布局会顶到最上
     protected var statusBarColor = R.color.ffffff
 

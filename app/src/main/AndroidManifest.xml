@@ -43,6 +43,10 @@
         <activity android:name=".view.datastore.TestDatastoreActivity" />
         <activity android:name=".view.meituan.MeiTuanActivity" />
         <activity android:name=".view.chart.ChartActivity" />
+        <activity android:name="com.hebao.testkotlin.view.model3d.cube.CubeActivity" />
+        <activity android:name="com.hebao.testkotlin.view.model3d.plane.PlaneActivity" />
+        <activity android:name="com.hebao.testkotlin.view.model3d.myobj.ObjActivity" />
+        <activity android:name="com.hebao.testkotlin.view.model3d.vr.VRActivity" />
     </application>
 
 </manifest>

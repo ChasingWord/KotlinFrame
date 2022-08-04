@@ -18,6 +18,9 @@
         <action
             android:id="@+id/action_FirstFragment_to_TestMotion"
             app:destination="@id/TestMotionFragment" />
+        <action
+            android:id="@+id/action_FirstFragment_to_test3DModelFragment"
+            app:destination="@id/test3DModelFragment" />
     </fragment>
     <fragment
         android:id="@+id/SecondFragment"
@@ -35,4 +38,9 @@
         android:name="com.hebao.testkotlin.view.main.TestMotionFragment"
         tools:layout="@layout/fragment_test_motion">
     </fragment>
+    <fragment
+        android:id="@+id/test3DModelFragment"
+        android:name="com.hebao.testkotlin.view.model3d.Test3DModelFragment"
+        android:label="Test3DModelFragment"
+        tools:layout="@layout/fragment_test_3d_model"/>
 </navigation>

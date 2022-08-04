@@ -56,4 +56,6 @@ dependencies {
     implementation depend["roomRuntime"]
     kapt depend["roomCompiler"]
     implementation depend["roomKtx"]
+
+    implementation 'com.google.vr:sdk-panowidget:1.80.0'
 }
