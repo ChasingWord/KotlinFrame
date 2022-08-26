@@ -47,4 +47,11 @@
         android:gravity="center"
         android:textColor="@color/white"
         android:textSize="15sp" />
+
+    <com.hebao.testkotlin.widget.TriangleView
+        android:layout_marginTop="400dp"
+        android:layout_width="50dp"
+        android:layout_height="25dp"/>
+
+
 </androidx.coordinatorlayout.widget.CoordinatorLayout>

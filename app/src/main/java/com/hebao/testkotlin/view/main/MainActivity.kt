@@ -21,7 +21,9 @@ import com.hebao.testkotlin.databinding.ActivityMainBinding
 import com.shrimp.base.utils.ActivityUtil
 import com.shrimp.base.utils.L
 import com.shrimp.base.utils.StatusBarUtil
+import com.shrimp.network.utils.CodeUtils
 import kotlinx.coroutines.*
+import java.util.*
 
 
 class MainActivity : AppCompatActivity() {
@@ -66,6 +68,11 @@ class MainActivity : AppCompatActivity() {
 //            L.e("Hello,")
 //            job.cancel()
         }
+
+        val md5 = CodeUtils.getMd5Value("25809630" + "dining0068006200730074")
+        val md5_2 = CodeUtils.md5("25809630" + "dining0068006200730074")
+        L.e("first md5: $md5")
+        L.e("second md5: $md5_2")
 
         binding.fabTop.setOnClickListener {
 //            main()
